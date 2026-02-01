@@ -1,4 +1,76 @@
 triggers:
+  - id: game_over_midnight
+    priority: 1
+    once: false
+    when: "time.hour >= 24"
+    effects: []
+    events:
+      - type: "end"
+        message: "午夜钟声吞掉了整座城市的嗡鸣。"
+
+  - id: night_deep
+    priority: 5
+    once: true
+    when: "time.hour >= 22 and flags.night_deep == false"
+    effects:
+      - op: set
+        path: "flags.night_deep"
+        value: true
+        reason: "夜深，危险上升"
+      - op: inc
+        path: "pressure"
+        value: 10
+        reason: "时间逼近午夜"
+    events:
+      - type: "warning"
+        message: "夜色更深，城市的门开始慢慢合上。"
+
+  - id: late_warn
+    priority: 6
+    once: true
+    when: "time.hour >= 23 and flags.late_warn == false"
+    effects:
+      - op: set
+        path: "flags.late_warn"
+        value: true
+        reason: "深夜警示"
+      - op: inc
+        path: "pressure"
+        value: 15
+        reason: "每一分钟都在下沉"
+    events:
+      - type: "warning"
+        message: "你听到远处的钟楼开始倒数。"
+
+  - id: bar_briefing
+    priority: 9
+    once: true
+    when: "location == '鸦巢酒吧' and flags.bar_briefed == false"
+    effects:
+      - op: set
+        path: "flags.bar_briefed"
+        value: true
+        reason: "酒吧开场"
+      - op: set
+        path: "flags.met_lian"
+        value: true
+        reason: "黎安现身"
+      - op: inc
+        path: "clues"
+        value: 1
+        reason: "获得巡检表"
+      - op: push
+        path: "truth_map"
+        value: "黎安提供了旧电厂巡检表的复印件。"
+        reason: "关键线索"
+      - op: push
+        path: "leads"
+        value: "核对巡检表上的签名是否伪造"
+        reason: "新的追踪方向"
+    events:
+      - type: "info"
+        message: "黎安把信封放到你手边。"
+
   - id: chased_when_suspicion_high
     priority: 10
     once: false
@@ -12,21 +84,318 @@ triggers:
         path: "energy"
         value: 10
         reason: "你不得不绕路甩尾巴"
+      - op: inc
+        path: "pressure"
+        value: 5
+        reason: "尾随带来压力"
     events:
       - type: "danger"
         message: "你感觉有人在雾里跟着你。"
 
-  - id: game_over_midnight
-    priority: 1
+  - id: calm_down_when_suspicion_low
+    priority: 11
     once: false
-    when: "time.hour >= 24"
-    effects: []
+    when: "suspicion <= 40 and flags.chased == true"
+    effects:
+      - op: set
+        path: "flags.chased"
+        value: false
+        reason: "尾随暂时消失"
     events:
-      - type: "end"
-        message: "午夜钟声吞掉了整座城市的嗡鸣。"
+      - type: "info"
+        message: "脚步声消失在雾里。"
+
+  - id: energy_low_warning
+    priority: 12
+    once: true
+    when: "energy <= 15 and flags.energy_low_warn == false"
+    effects:
+      - op: set
+        path: "flags.energy_low_warn"
+        value: true
+        reason: "精力不足"
+      - op: inc
+        path: "pressure"
+        value: 5
+        reason: "疲劳让你更易出错"
+    events:
+      - type: "warning"
+        message: "你的眼皮像压着铅，判断开始迟钝。"
+
+  - id: broke_warning
+    priority: 13
+    once: true
+    when: "gold <= 0 and flags.broke_warn == false"
+    effects:
+      - op: set
+        path: "flags.broke_warn"
+        value: true
+        reason: "身无分文"
+      - op: inc
+        path: "pressure"
+        value: 5
+        reason: "没钱的夜更难走"
+    events:
+      - type: "warning"
+        message: "口袋空了，风都比你更像靠山。"
+
+  - id: dock_first_visit
+    priority: 14
+    once: true
+    when: "location == '码头' and flags.dock_checked == false"
+    effects:
+      - op: set
+        path: "flags.dock_checked"
+        value: true
+        reason: "码头踏查"
+      - op: inc
+        path: "threads.union"
+        value: 1
+        reason: "工会线索推进"
+      - op: inc
+        path: "clues"
+        value: 1
+        reason: "发现电缆残头"
+      - op: push
+        path: "truth_map"
+        value: "码头仓库里有被切断的电缆残头。"
+        reason: "现场痕迹"
+      - op: push
+        path: "leads"
+        value: "追查码头电缆去向"
+        reason: "新的追踪方向"
+    events:
+      - type: "info"
+        message: "潮湿的绳索旁，有人刚割过电缆。"
+
+  - id: lighthouse_first_visit
+    priority: 15
+    once: true
+    when: "location == '灯塔' and flags.lighthouse_checked == false"
+    effects:
+      - op: set
+        path: "flags.lighthouse_checked"
+        value: true
+        reason: "灯塔踏查"
+      - op: inc
+        path: "threads.blackout"
+        value: 1
+        reason: "停电线索推进"
+      - op: inc
+        path: "clues"
+        value: 1
+        reason: "发现值班日志缺失"
+      - op: push
+        path: "truth_map"
+        value: "灯塔值班日志缺了今天的页。"
+        reason: "关键缺失"
+      - op: push
+        path: "leads"
+        value: "找到灯塔值班员"
+        reason: "新的追踪方向"
+    events:
+      - type: "info"
+        message: "灯塔里只剩风在翻页。"
+
+  - id: hospital_first_visit
+    priority: 16
+    once: true
+    when: "location == '医院' and flags.hospital_checked == false"
+    effects:
+      - op: set
+        path: "flags.hospital_checked"
+        value: true
+        reason: "医院踏查"
+      - op: inc
+        path: "threads.blackout"
+        value: 1
+        reason: "备电线索推进"
+      - op: inc
+        path: "clues"
+        value: 1
+        reason: "发现燃料记录异常"
+      - op: push
+        path: "truth_map"
+        value: "医院备电燃料记录缺了一次签字。"
+        reason: "异常记录"
+      - op: push
+        path: "leads"
+        value: "查清燃料缺口来源"
+        reason: "新的追踪方向"
+    events:
+      - type: "info"
+        message: "走廊里每盏灯都像被时间拽住。"
+
+  - id: press_first_visit
+    priority: 17
+    once: true
+    when: "location == '报社' and flags.press_checked == false"
+    effects:
+      - op: set
+        path: "flags.press_checked"
+        value: true
+        reason: "报社接触"
+      - op: inc
+        path: "relationships.editor"
+        value: 5
+        reason: "编辑愿意听你说"
+      - op: push
+        path: "leads"
+        value: "整理事实链交给编辑"
+        reason: "结局准备"
+    events:
+      - type: "info"
+        message: "打字机的声音像潮水。"
+
+  - id: archive_opened
+    priority: 18
+    once: true
+    when: "location == '档案馆' and flags.archive_opened == false"
+    effects:
+      - op: set
+        path: "flags.archive_opened"
+        value: true
+        reason: "进入档案馆"
+      - op: inc
+        path: "clues"
+        value: 1
+        reason: "档案记录提供了线索"
+      - op: push
+        path: "truth_map"
+        value: "档案室里有一份被抽走的备电清单副本。"
+        reason: "关键记录"
+      - op: push
+        path: "leads"
+        value: "查清备电清单缺失的一页去了哪里"
+        reason: "新的追踪方向"
+    events:
+      - type: "info"
+        message: "尘封的档案像雨夜里的脚印一样清晰。"
+
+  - id: plant_infiltrated
+    priority: 19
+    once: true
+    when: "location == '旧电厂' and flags.plant_infiltrated == false"
+    effects:
+      - op: set
+        path: "flags.plant_infiltrated"
+        value: true
+        reason: "进入旧电厂"
+      - op: inc
+        path: "clues"
+        value: 1
+        reason: "发现被撬过的配电箱"
+      - op: inc
+        path: "threads.blackout"
+        value: 1
+        reason: "停电线索推进"
+      - op: push
+        path: "truth_map"
+        value: "旧电厂的配电箱有新拆封痕迹。"
+        reason: "现场痕迹"
+    events:
+      - type: "info"
+        message: "电厂像一具被掏空的鲸，内部却仍有余温。"
+
+  - id: city_hall_contact
+    priority: 20
+    once: true
+    when: "location == '钟楼街' and flags.mayor_contacted == false"
+    effects:
+      - op: set
+        path: "flags.mayor_contacted"
+        value: true
+        reason: "接触市政线"
+      - op: inc
+        path: "threads.city_hall"
+        value: 1
+        reason: "市政线推进"
+      - op: inc
+        path: "suspicion"
+        value: 5
+        reason: "靠近权力中心会被注意"
+    events:
+      - type: "info"
+        message: "钟楼街的风里有公章的味道。"
+
+  - id: union_breakthrough
+    priority: 21
+    once: true
+    when: "threads.union >= 2 and flags.union_break == false"
+    effects:
+      - op: set
+        path: "flags.union_break"
+        value: true
+        reason: "工会线索突破"
+      - op: inc
+        path: "clues"
+        value: 1
+        reason: "工会内部口供"
+      - op: push
+        path: "truth_map"
+        value: "工会仓库的电缆被临时替换过。"
+        reason: "口供"
+    events:
+      - type: "info"
+        message: "有人在工会里松了口。"
+
+  - id: smuggling_breakthrough
+    priority: 22
+    once: true
+    when: "threads.smuggling >= 2 and flags.smuggling_break == false"
+    effects:
+      - op: set
+        path: "flags.smuggling_break"
+        value: true
+        reason: "走私线索突破"
+      - op: inc
+        path: "clues"
+        value: 1
+        reason: "发现走私链条"
+      - op: push
+        path: "truth_map"
+        value: "停电当晚有一条走私线借黑暗出港。"
+        reason: "关键口供"
+    events:
+      - type: "info"
+        message: "港口的黑夜不只遮住灯，也遮住船。"
+
+  - id: pressure_breaking_point
+    priority: 23
+    once: true
+    when: "pressure >= 85 and flags.breaking_point == false"
+    effects:
+      - op: set
+        path: "flags.breaking_point"
+        value: true
+        reason: "压力临界"
+      - op: dec
+        path: "energy"
+        value: 5
+        reason: "精神紧绷"
+    events:
+      - type: "warning"
+        message: "你的呼吸开始急促，夜色像盖在肩上的铁。"
+
+  - id: leak_ready
+    priority: 24
+    once: true
+    when: "clues >= 6 and relationships.editor >= 20 and flags.leak_ready == false"
+    effects:
+      - op: set
+        path: "flags.leak_ready"
+        value: true
+        reason: "报社愿意出手"
+      - op: push
+        path: "leads"
+        value: "联系报社准备公开证据"
+        reason: "结局路线开启"
+    events:
+      - type: "breakthrough"
+        message: "编辑递给你一台还热的打字机。"
 
   - id: confirm_sabotage_when_enough_truth
-    priority: 20
+    priority: 25
     once: true
     when: "clues >= 8 and flags.power_sabotage_confirmed == false"
     effects:
@@ -34,10 +403,18 @@ triggers:
         path: "flags.power_sabotage_confirmed"
         value: true
         reason: "线索已足以确认：这是人为破坏"
+      - op: inc
+        path: "threads.blackout"
+        value: 1
+        reason: "停电线索推进"
       - op: push
         path: "truth_map"
         value: "停电并非事故：有人针对旧电厂做了手脚。"
         reason: "关键结论"
+      - op: push
+        path: "leads"
+        value: "决定证据交给谁"
+        reason: "进入结局分支"
     events:
       - type: "breakthrough"
         message: "你把碎片拼成一张能致命的图。"

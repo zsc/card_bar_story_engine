@@ -1,0 +1,624 @@
+game_id: polish_solider
+title: "远东西行记：从维斯瓦河到大同江"
+version: "1.1.0"
+language: "zh-CN"
+tone: "war_epic_historical"
+content_rating: "PG-13"
+
+llm:
+  recommended_model: "gpt-4.1-mini-or-gemini-1.5"
+  temperature: 0.75
+  max_output_tokens: 1200
+
+status_bar:
+  items:
+    - var_id: hp
+      label: "生命"
+      style: meter
+      show_delta: true
+      critical_threshold: 25
+    - var_id: morale
+      label: "士气"
+      style: meter
+      show_delta: true
+      critical_threshold: 20
+    - var_id: trust_soviet
+      label: "苏方信任"
+      style: meter
+      show_delta: true
+      critical_threshold: 20
+    - var_id: combat_exp
+      label: "战功"
+      style: text
+      show_delta: true
+      critical_threshold: 0
+    - var_id: year
+      label: "年份"
+      style: text
+      show_delta: false
+
+variables:
+  # === 基础生存属性 ===
+  - id: hp
+    label: "生命"
+    type: integer
+    min: 0
+    max: 100
+    default: 90
+    card: { visible: false, order: 0, format: plain, description: "身体状态，受伤会降低战斗力。", prompt_weight: high }
+    rules: { clamp: true, readonly: false, update_policy: any }
+    tags: ["resource"]
+
+  - id: morale
+    label: "士气"
+    type: integer
+    min: 0
+    max: 100
+    default: 50
+    card:
+      visible: true
+      order: 10
+      format: bar
+      description: "战斗意志与心理韧性。过低会溃散或叛逃。"
+      prompt_weight: high
+    rules: { clamp: true, readonly: false, update_policy: any }
+    tags: ["resource"]
+
+  - id: sanity
+    label: "理智"
+    type: integer
+    min: 0
+    max: 100
+    default: 70
+    card:
+      visible: true
+      order: 12
+      format: bar
+      description: "精神健康程度。战争创伤、道德困境会降低理智。"
+      prompt_weight: high
+    rules: { clamp: true, readonly: false, update_policy: any }
+    tags: ["resource"]
+
+  # === 政治身份属性 ===
+  - id: trust_soviet
+    label: "苏方信任"
+    type: integer
+    min: 0
+    max: 100
+    default: 30
+    card:
+      visible: true
+      order: 15
+      format: bar
+      description: "苏联军方对你的信任程度。影响晋升与任务分配。"
+      prompt_weight: high
+    rules: { clamp: true, readonly: false, update_policy: any }
+    tags: ["resource"]
+
+  - id: polish_identity
+    label: "波兰认同"
+    type: integer
+    min: 0
+    max: 100
+    default: 80
+    card:
+      visible: true
+      order: 17
+      format: bar
+      description: "对祖国波兰的忠诚与认同。"
+      prompt_weight: medium
+    rules: { clamp: true, readonly: false, update_policy: any }
+    tags: ["resource"]
+
+  - id: communist_sympathy
+    label: "左翼倾向"
+    type: integer
+    min: 0
+    max: 100
+    default: 20
+    card:
+      visible: true
+      order: 18
+      format: bar
+      description: "对共产主义理想的认同程度。"
+      prompt_weight: medium
+    rules: { clamp: true, readonly: false, update_policy: any }
+    tags: ["resource"]
+
+  # === 战斗属性 ===
+  - id: combat_exp
+    label: "战功"
+    type: integer
+    min: 0
+    max: 50
+    default: 0
+    card:
+      visible: true
+      order: 20
+      format: bar
+      description: "在东线和远东战场积累的战功点数。"
+      prompt_weight: medium
+    rules: { clamp: true, readonly: false, update_policy: any }
+    tags: ["progress"]
+
+  - id: military_skill
+    label: "军事技能"
+    type: integer
+    min: 0
+    max: 100
+    default: 40
+    card:
+      visible: true
+      order: 21
+      format: bar
+      description: "战术素养、射击、指挥等综合能力。"
+      prompt_weight: medium
+    rules: { clamp: true, readonly: false, update_policy: any }
+    tags: ["progress"]
+
+  - id: leadership
+    label: "领导力"
+    type: integer
+    min: 0
+    max: 100
+    default: 30
+    card:
+      visible: true
+      order: 22
+      format: bar
+      description: "指挥和激励他人的能力。"
+      prompt_weight: medium
+    rules: { clamp: true, readonly: false, update_policy: any }
+    tags: ["progress"]
+
+  # === 世界状态 ===
+  - id: rank
+    label: "军衔"
+    type: enum
+    enum_values: ["战俘", "列兵", "下士", "中士", "上士", "准尉", "少尉", "中尉", "上尉"]
+    default: "战俘"
+    card:
+      visible: true
+      order: 25
+      format: plain
+      description: "你在苏军中的军衔地位。"
+      prompt_weight: high
+    rules: { clamp: false, readonly: false, update_policy: set_only }
+    tags: ["world"]
+
+  - id: year
+    label: "日期"
+    type: object
+    default:
+      year: 1939
+      month: 9
+      day: 28
+      season: "秋季"
+    card:
+      visible: true
+      order: 30
+      format: keyvalue
+      description: "时间与季节。故事跨越1939-1945年。"
+      prompt_weight: high
+    rules: { clamp: false, readonly: false, update_policy: any }
+    tags: ["world"]
+
+  - id: location
+    label: "所在战区"
+    type: enum
+    enum_values: ["波兰", "科泽利斯克战俘营", "苏德前线", "乌克兰", "白俄罗斯", "莫斯科", "远东", "伯力", "满洲", "朝鲜", "平壤", "返回波兰"]
+    default: "波兰"
+    card:
+      visible: true
+      order: 35
+      format: plain
+      description: "当前所在的战场或驻扎地。"
+      prompt_weight: high
+    rules: { clamp: false, readonly: false, update_policy: set_only }
+    tags: ["world"]
+
+  - id: unit
+    label: "所属部队"
+    type: enum
+    enum_values: ["无", "科泽利斯克战俘", "科斯丘什科师", "波兰第一军", "苏联红军", "远东第1方面军", "第25集团军", "第88独立步兵旅", "朝鲜支队", "遣返部队"]
+    default: "无"
+    card:
+      visible: true
+      order: 40
+      format: plain
+      description: "你服役的部队番号。"
+      prompt_weight: high
+    rules: { clamp: false, readonly: false, update_policy: set_only }
+    tags: ["world"]
+
+  - id: weather
+    label: "天气"
+    type: enum
+    enum_values: ["晴朗", "多云", "下雨", "下雪", "严寒", "酷暑", "雾霾", "沙尘"]
+    default: "多云"
+    card:
+      visible: true
+      order: 42
+      format: plain
+      description: "当前天气状况，影响作战和心情。"
+      prompt_weight: low
+    rules: { clamp: false, readonly: false, update_policy: set_only }
+    tags: ["world"]
+
+  # === 关系系统 ===
+  - id: relationships
+    label: "重要关系"
+    type: object
+    default:
+      waclaw: 60
+      tadeusz: 40
+      sofia: 0
+      petrov: 0
+      zarina: 0
+      sasha_translator: 10
+      kim_guerrilla: 0
+      wang_farmer: 0
+      polish_comrades: 50
+      soviet_commanders: 0
+      german_pows: -20
+      korean_civilians: 0
+      chinese_civilians: 0
+      japanese_pows: -30
+    card:
+      visible: true
+      order: 50
+      format: keyvalue
+      description: "与各方人物的关系。范围-100..100。"
+      prompt_weight: medium
+    rules: { clamp: false, readonly: false, update_policy: any }
+    tags: ["relationship"]
+
+  # === 知识与记忆 ===
+  - id: battle_record
+    label: "参战记录"
+    type: list
+    default: []
+    card:
+      visible: true
+      order: 55
+      format: list
+      description: "经历过的重要战役。"
+      prompt_weight: medium
+    rules: { clamp: false, readonly: false, update_policy: any }
+    tags: ["knowledge"]
+
+  - id: war_stories
+    label: "战争记忆"
+    type: list
+    default: []
+    card:
+      visible: true
+      order: 60
+      format: list
+      description: "用一句话记录经历的关键事件。"
+      prompt_weight: medium
+    rules: { clamp: false, readonly: false, update_policy: any }
+    tags: ["knowledge"]
+
+  - id: secrets_known
+    label: "秘密知晓"
+    type: list
+    default: []
+    card:
+      visible: true
+      order: 62
+      format: list
+      description: "你知道的机密信息。"
+      prompt_weight: high
+    rules: { clamp: false, readonly: false, update_policy: any }
+    tags: ["knowledge"]
+
+  - id: languages
+    label: "语言能力"
+    type: object
+    default:
+      polish: 100
+      russian: 20
+      german: 30
+      korean: 0
+      chinese: 0
+      japanese: 0
+    card:
+      visible: true
+      order: 63
+      format: keyvalue
+      description: "各语言掌握程度（0-100）。"
+      prompt_weight: low
+    rules: { clamp: false, readonly: false, update_policy: any }
+    tags: ["knowledge"]
+
+  # === 物品系统 ===
+  - id: inventory
+    label: "随身物品"
+    type: list
+    default: ["波兰军徽", "家人照片", "《塔杜施先生》", "十字架项链", "皮日记本"]
+    card:
+      visible: true
+      order: 70
+      format: list
+      description: "随身携带的私人物品。"
+      prompt_weight: low
+    rules: { clamp: false, readonly: false, update_policy: any }
+    tags: ["items"]
+
+  - id: equipment
+    label: "装备"
+    type: object
+    default:
+      rifle: "无"
+      sidearm: "无"
+      uniform: "波兰战俘服"
+      helmet: "无"
+      boots: "破损军靴"
+      backpack: "无"
+    card:
+      visible: true
+      order: 71
+      format: keyvalue
+      description: "军事装备状况。"
+      prompt_weight: medium
+    rules: { clamp: false, readonly: false, update_policy: any }
+    tags: ["items"]
+
+  - id: rations
+    label: "口粮"
+    type: integer
+    min: 0
+    max: 20
+    default: 3
+    card:
+      visible: true
+      order: 72
+      format: plain
+      description: "剩余的食物份额。"
+      prompt_weight: medium
+    rules: { clamp: true, readonly: false, update_policy: any }
+    tags: ["resource"]
+
+  # === 身体状态 ===
+  - id: wounds
+    label: "伤病"
+    type: integer
+    min: 0
+    max: 10
+    default: 0
+    card:
+      visible: true
+      order: 73
+      format: plain
+      description: "积累的战伤次数。"
+      prompt_weight: medium
+    rules: { clamp: true, readonly: false, update_policy: any }
+    tags: ["resource"]
+
+  - id: disease
+    label: "疾病"
+    type: enum
+    enum_values: ["健康", "感冒", "痢疾", "伤寒", "冻伤", "战壕足", "疟疾"]
+    default: "健康"
+    card:
+      visible: true
+      order: 74
+      format: plain
+      description: "当前健康状况。"
+      prompt_weight: high
+    rules: { clamp: false, readonly: false, update_policy: set_only }
+    tags: ["resource"]
+
+  # === 剧情标志 ===
+  - id: flags
+    label: "剧情标记"
+    type: object
+    default:
+      # 主要剧情阶段
+      in_prison: true
+      joined_kosciuszko: false
+      joined_red_army: false
+      sent_to_far_east: false
+      fought_in_manchuria: false
+      liberated_korea: false
+      returned_poland: false
+      
+      # 重要人物相遇
+      met_waclaw: true
+      met_tadeusz: true
+      met_sofia: false
+      met_petrov: false
+      met_zarina: false
+      met_sasha: false
+      met_kim: false
+      met_wang: false
+      
+      # 关键事件
+      survived_katyn_massacre: false
+      witnessed_atrocity: false
+      saved_civilian: false
+      executed_prisoner: false
+      refused_order: false
+      promoted: false
+      wounded: false
+      decorated: false
+      wrote_testimony: false
+      
+      # 心理状态
+      disillusioned: false
+      homesick: false
+      traumatized: false
+      hopeful: false
+      religious_crisis: false
+      
+      # 政治选择
+      joined_party: false
+      refused_propaganda: false
+      informed_on_comrade: false
+      protected_polish: false
+      
+      # 远东特殊
+      learned_russian: false
+      learned_korean: false
+      made_korean_friend: false
+      found_love: false
+      lost_comrade: false
+      
+    card:
+      visible: true
+      order: 80
+      format: keyvalue
+      description: "引擎内部的剧情开关。"
+      prompt_weight: low
+    rules: { clamp: false, readonly: false, update_policy: any }
+    tags: ["flag"]
+
+  # === 隐藏属性（不显示但影响剧情）===
+  - id: karma
+    label: "业力"
+    type: integer
+    min: -100
+    max: 100
+    default: 0
+    card:
+      visible: false
+      order: 0
+      format: plain
+      description: "道德选择的累积。"
+      prompt_weight: hidden
+    rules: { clamp: true, readonly: false, update_policy: any }
+    tags: ["hidden"]
+
+  - id: fate_points
+    label: "命运点"
+    type: integer
+    min: 0
+    max: 5
+    default: 2
+    card:
+      visible: false
+      order: 0
+      format: plain
+      description: "关键时刻改变命运的机会。"
+      prompt_weight: hidden
+    rules: { clamp: true, readonly: false, update_policy: any }
+    tags: ["hidden"]
+
+initial_state:
+  hp: 90
+  morale: 50
+  sanity: 70
+  trust_soviet: 30
+  polish_identity: 80
+  communist_sympathy: 20
+  combat_exp: 0
+  military_skill: 40
+  leadership: 30
+  rank: "战俘"
+  year: { year: 1939, month: 9, day: 28, season: "秋季" }
+  location: "波兰"
+  unit: "科泽利斯克战俘"
+  weather: "多云"
+  relationships:
+    waclaw: 60
+    tadeusz: 40
+    sofia: 0
+    petrov: 0
+    zarina: 0
+    sasha_translator: 10
+    kim_guerrilla: 0
+    wang_farmer: 0
+    polish_comrades: 50
+    soviet_commanders: 0
+    german_pows: -20
+    korean_civilians: 0
+    chinese_civilians: 0
+    japanese_pows: -30
+  battle_record: []
+  war_stories: []
+  secrets_known: []
+  languages:
+    polish: 100
+    russian: 20
+    german: 30
+    korean: 0
+    chinese: 0
+    japanese: 0
+  inventory: ["波兰军徽", "家人照片", "《塔杜施先生》", "十字架项链", "皮日记本"]
+  equipment:
+    rifle: "无"
+    sidearm: "无"
+    uniform: "波兰战俘服"
+    helmet: "无"
+    boots: "破损军靴"
+    backpack: "无"
+  rations: 3
+  wounds: 0
+  disease: "健康"
+  flags:
+    in_prison: true
+    joined_kosciuszko: false
+    joined_red_army: false
+    sent_to_far_east: false
+    fought_in_manchuria: false
+    liberated_korea: false
+    returned_poland: false
+    met_waclaw: true
+    met_tadeusz: true
+    met_sofia: false
+    met_petrov: false
+    met_zarina: false
+    met_sasha: false
+    met_kim: false
+    met_wang: false
+    survived_katyn_massacre: false
+    witnessed_atrocity: false
+    saved_civilian: false
+    executed_prisoner: false
+    refused_order: false
+    promoted: false
+    wounded: false
+    decorated: false
+    wrote_testimony: false
+    disillusioned: false
+    homesick: false
+    traumatized: false
+    hopeful: false
+    religious_crisis: false
+    joined_party: false
+    refused_propaganda: false
+    informed_on_comrade: false
+    protected_polish: false
+    learned_russian: false
+    learned_korean: false
+    made_korean_friend: false
+    found_love: false
+    lost_comrade: false
+  karma: 0
+  fate_points: 2
+
+win_conditions:
+  - "flags.liberated_korea == true and combat_exp >= 15 and morale >= 40"
+  - "flags.returned_poland == true and karma >= 20"
+  - "flags.liberated_korea == true and flags.saved_civilian == true and flags.protected_polish == true"
+
+lose_conditions:
+  - "hp <= 0"
+  - "morale <= 0 and trust_soviet < 20"
+  - "sanity <= 0"
+  - "flags.executed_prisoner == true and karma <= -50"
+
+prompt_rules:
+  style_notes:
+    - "史诗战争叙事：宏大历史背景下的个人命运。"
+    - "克制而深沉的情感描写，避免过度煽情。"
+    - "尊重历史：1939年苏德瓜分波兰，1940年卡廷惨案，1941年巴巴罗萨后波兰军团重建，1945年苏军出兵东北。"
+    - "关键地点：波兰→科泽利斯克→瑟尔采→东线→莫斯科→远东→满洲→朝鲜→平壤。"
+    - "多分支叙事：玩家的道德选择会显著影响剧情走向。"
+    - "人物塑造丰满，每个重要NPC都有自己的立场和故事。"
+  boundaries:
+    - "PG-13：不写露骨性内容，不描写过度血腥细节。"
+    - "尊重各国人民，避免种族歧视描写。"
+    - "不能替玩家做决定，必须给出选择。"
+    - "涉及历史敏感事件时保持客观和尊重。"

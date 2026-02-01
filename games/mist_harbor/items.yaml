@@ -1,0 +1,54 @@
+items:
+  - id: watch
+    name: "旧怀表"
+    description: "滴答声在夜里像心跳。"
+    use: "提醒时间，或者撬开记忆。"
+    tags: ["personal", "time"]
+
+  - id: cigarette
+    name: "纸烟"
+    description: "烟雾能挡住目光，但也会引来目光。"
+    use: "换情报或拖延对话。"
+    tags: ["social"]
+
+  - id: knife
+    name: "折叠小刀"
+    description: "刀口不锋利，但足够让人退半步。"
+    use: "自保或撬开松动的封条。"
+    tags: ["tool", "risk"]
+
+  - id: matches
+    name: "防水火柴"
+    description: "在海雾里还能点燃的火。"
+    use: "在停电场景中照明、烧毁纸件。"
+    tags: ["tool"]
+
+  - id: card
+    name: "旧名片"
+    description: "印着“记者”，背面夹着欠条。"
+    use: "唤起旧关系或交换面子。"
+    tags: ["social"]
+
+  - id: inspection_copy
+    name: "巡检表复印件"
+    description: "墨迹未干，签名像临时补上。"
+    use: "证明停电前有人进出旧电厂。"
+    tags: ["evidence"]
+
+  - id: fuel_record
+    name: "燃料出入记录"
+    description: "少了一行，少得太干净。"
+    use: "指向医院或灯塔的备电异常。"
+    tags: ["evidence"]
+
+  - id: cable_stub
+    name: "电缆残头"
+    description: "焦黑的皮层里夹着盐晶。"
+    use: "证明有人在码头附近拆了电缆。"
+    tags: ["evidence", "industrial"]
+
+  - id: mayor_memo
+    name: "市政备忘录"
+    description: "一页纸，写着“不要扩散”。"
+    use: "迫使市长顾问给出交易。"
+    tags: ["leverage", "evidence"]

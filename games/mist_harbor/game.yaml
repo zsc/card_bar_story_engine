@@ -1,6 +1,6 @@
 game_id: mist_harbor
 title: "雾港回声"
-version: "1.0.0"
+version: "1.2.0"
 language: "zh-CN"
 tone: "noir_mystery"
 content_rating: "PG-13"
@@ -22,6 +22,21 @@ status_bar:
       style: meter
       show_delta: true
       critical_threshold: 20
+    - var_id: suspicion
+      label: "嫌疑"
+      style: meter
+      show_delta: true
+      critical_threshold: 80
+    - var_id: pressure
+      label: "压力"
+      style: meter
+      show_delta: true
+      critical_threshold: 80
+    - var_id: clues
+      label: "线索"
+      style: text
+      show_delta: true
+      critical_threshold: 0
     - var_id: gold
       label: "币"
       style: text
@@ -94,6 +109,21 @@ variables:
     rules: { clamp: true, readonly: false, update_policy: any }
     tags: ["risk"]
 
+  - id: pressure
+    label: "压力"
+    type: integer
+    min: 0
+    max: 100
+    default: 20
+    card:
+      visible: true
+      order: 25
+      format: bar
+      description: "城市与时间对你施压的总量。"
+      prompt_weight: high
+    rules: { clamp: true, readonly: false, update_policy: any }
+    tags: ["risk"]
+
   - id: clues
     label: "线索"
     type: integer
@@ -122,10 +152,23 @@ variables:
     rules: { clamp: false, readonly: false, update_policy: any }
     tags: ["knowledge"]
 
+  - id: leads
+    label: "待追线索"
+    type: list
+    default: []
+    card:
+      visible: true
+      order: 45
+      format: list
+      description: "还没跟进的线索与行动方向。"
+      prompt_weight: medium
+    rules: { clamp: false, readonly: false, update_policy: any }
+    tags: ["progress"]
+
   - id: location
     label: "所在地点"
     type: enum
-    enum_values: ["码头", "灯塔", "旧电厂", "钟楼街", "鸦巢酒吧", "报社"]
+    enum_values: ["码头", "灯塔", "旧电厂", "钟楼街", "鸦巢酒吧", "报社", "医院", "档案馆"]
     default: "鸦巢酒吧"
     card:
       visible: true
@@ -143,6 +186,8 @@ variables:
       lian: 35
       mayor: -10
       dockmaster: 5
+      editor: 10
+      chief: 0
     card:
       visible: true
       order: 60
@@ -152,10 +197,42 @@ variables:
     rules: { clamp: false, readonly: false, update_policy: any }
     tags: ["relationship"]
 
+  - id: reputation
+    label: "声望"
+    type: integer
+    min: -100
+    max: 100
+    default: 0
+    card:
+      visible: true
+      order: 65
+      format: plain
+      description: "街面与体面两边对你的评价。"
+      prompt_weight: low
+    rules: { clamp: true, readonly: false, update_policy: any }
+    tags: ["relationship"]
+
+  - id: threads
+    label: "调查线"
+    type: object
+    default:
+      blackout: 0
+      city_hall: 0
+      union: 0
+      smuggling: 0
+    card:
+      visible: true
+      order: 67
+      format: keyvalue
+      description: "每条线索线的推进程度（0-3）。"
+      prompt_weight: medium
+    rules: { clamp: false, readonly: false, update_policy: any }
+    tags: ["progress"]
+
   - id: inventory
     label: "随身物品"
     type: list
-    default: ["旧怀表", "纸烟", "折叠小刀"]
+    default: ["旧怀表", "纸烟", "折叠小刀", "防水火柴", "旧名片"]
     card:
       visible: true
       order: 70
@@ -165,6 +242,21 @@ variables:
     rules: { clamp: false, readonly: false, update_policy: any }
     tags: ["items"]
 
+  - id: debts
+    label: "人情债"
+    type: integer
+    min: 0
+    max: 5
+    default: 1
+    card:
+      visible: true
+      order: 75
+      format: plain
+      description: "你欠别人或别人欠你的账。"
+      prompt_weight: low
+    rules: { clamp: true, readonly: false, update_policy: any }
+    tags: ["resource"]
+
   - id: flags
     label: "旗标"
     type: object
@@ -172,6 +264,22 @@ variables:
       met_lian: false
       power_sabotage_confirmed: false
       chased: false
+      energy_low_warn: false
+      night_deep: false
+      archive_opened: false
+      mayor_contacted: false
+      plant_infiltrated: false
+      leak_ready: false
+      broke_warn: false
+      breaking_point: false
+      dock_checked: false
+      lighthouse_checked: false
+      hospital_checked: false
+      press_checked: false
+      bar_briefed: false
+      late_warn: false
+      union_break: false
+      smuggling_break: false
     card:
       visible: true
       order: 80
@@ -187,24 +295,58 @@ initial_state:
   gold: 12
   time: { day: 1, hour: 20, minute: 10 }
   suspicion: 10
+  pressure: 20
   clues: 0
   truth_map: []
+  leads:
+    - "确认停电前后进出旧电厂的人"
+    - "找出谁在买消息"
+    - "查清灯塔值班日志缺失的原因"
+    - "核对备电清单缺失的一页"
   location: "鸦巢酒吧"
-  relationships: { lian: 35, mayor: -10, dockmaster: 5 }
-  inventory: ["旧怀表", "纸烟", "折叠小刀"]
-  flags: { met_lian: false, power_sabotage_confirmed: false, chased: false }
+  relationships: { lian: 35, mayor: -10, dockmaster: 5, editor: 10, chief: 0 }
+  reputation: 0
+  threads: { blackout: 0, city_hall: 0, union: 0, smuggling: 0 }
+  inventory: ["旧怀表", "纸烟", "折叠小刀", "防水火柴", "旧名片"]
+  debts: 1
+  flags:
+    met_lian: false
+    power_sabotage_confirmed: false
+    chased: false
+    energy_low_warn: false
+    night_deep: false
+    archive_opened: false
+    mayor_contacted: false
+    plant_infiltrated: false
+    leak_ready: false
+    broke_warn: false
+    breaking_point: false
+    dock_checked: false
+    lighthouse_checked: false
+    hospital_checked: false
+    press_checked: false
+    bar_briefed: false
+    late_warn: false
+    union_break: false
+    smuggling_break: false
 
 win_conditions:
   - "flags.power_sabotage_confirmed == true and clues >= 8"
+  - "flags.leak_ready == true and clues >= 6"
 lose_conditions:
   - "hp <= 0"
   - "suspicion >= 100"
+  - "pressure >= 100"
   - "time.hour >= 24"
 
 prompt_rules:
   style_notes:
     - "新黑色：潮湿、霓虹、雾、短句、暗喻克制。"
-    - "推动调查：每回合推进一个线索/关系/风险。"
+    - "调查推进：每回合推进一个线索/关系/风险。"
+    - "关键地点有限：码头 / 灯塔 / 旧电厂 / 钟楼街 / 鸦巢酒吧 / 报社 / 医院 / 档案馆。"
+    - "关键人物有限：黎安、码头总管、市长顾问、报社编辑、警署长官。"
+    - "优先使用待追线索（leads）与调查线（threads）驱动行动。"
   boundaries:
     - "PG-13：不写露骨性内容，不描写血腥细节。"
     - "不输出真实世界违法操作指南。"
+    - "不能替玩家做决定，必须给出选择。"

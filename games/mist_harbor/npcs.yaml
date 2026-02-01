@@ -1,0 +1,60 @@
+npcs:
+  - id: lian
+    name: "黎安"
+    role: "街头情报贩子"
+    hook: "知道谁在买消息，价格却总在涨。"
+    secret: "她替别人保管了一份改动过的巡检表。"
+    manner: "嘴硬心软，习惯先试探再交底。"
+    leverage: "她需要你帮她摆脱一笔旧债。"
+    location: "鸦巢酒吧"
+    tags: ["info", "street"]
+
+  - id: dockmaster
+    name: "码头总管"
+    role: "码头工会的实际调度者"
+    hook: "对停电时间点的货物调度含糊其辞。"
+    secret: "那晚他放走了一艘不该出港的船。"
+    manner: "总是笑，笑里却不站队。"
+    leverage: "你握有他一张老照片的底片。"
+    location: "码头"
+    tags: ["union", "logistics"]
+
+  - id: mayor_advisor
+    name: "市长顾问"
+    role: "市政厅危机顾问"
+    hook: "愿意用“更大的危机”交换你的沉默。"
+    secret: "备电清单的缺页在他抽屉里。"
+    manner: "说话像在签合同。"
+    leverage: "他怕媒体，但更怕上级。"
+    location: "钟楼街"
+    tags: ["city_hall", "power"]
+
+  - id: editor
+    name: "报社编辑"
+    role: "雾港日报的夜班编辑"
+    hook: "愿意帮你公开证据，但要先看清事实链。"
+    secret: "他收过市政厅的“捐款”。"
+    manner: "寡言，句子像排版。"
+    leverage: "他缺一条能上头版的硬核线索。"
+    location: "报社"
+    tags: ["press", "truth"]
+
+  - id: chief
+    name: "警署长官"
+    role: "警署行动负责人"
+    hook: "需要一个结案的人选。"
+    secret: "他的人那晚在旧电厂附近出现过。"
+    manner: "没有耐心。"
+    leverage: "他怕舆论失控。"
+    location: "钟楼街"
+    tags: ["police", "pressure"]
+
+  - id: nurse
+    name: "夜班护士"
+    role: "医院后勤联络"
+    hook: "她知道备用发电机缺过一次燃料。"
+    secret: "她帮人借过药品清单。"
+    manner: "语速快，语气冷。"
+    leverage: "她需要一个安静的下班夜。"
+    location: "医院"
+    tags: ["hospital", "supply"]

@@ -1,0 +1,992 @@
+triggers:
+  # ============================================
+  # 第一部分：战俘营时期（1939-1941）
+  # ============================================
+
+  - id: prison_life_opening
+    priority: 1
+    once: true
+    when: "flags.in_prison == true and year.year == 1939"
+    effects:
+      - op: push
+        path: "war_stories"
+        value: "1939年9月28日：被关押在科泽利斯克战俘营。"
+        reason: "记录关押"
+      - op: dec
+        path: "rations"
+        value: 1
+        reason: "营地食物短缺"
+    events:
+      - type: "milestone"
+        message: "科泽利斯克修道院的钟声不再为祈祷而鸣。你的名字在名单上，命运未卜。"
+
+  - id: katyn_massacre_survival
+    priority: 2
+    once: true
+    when: "year.year == 1940 and year.month >= 3 and year.month <= 5 and flags.in_prison == true and flags.survived_katyn_massacre == false"
+    effects:
+      - op: set
+        path: "flags.survived_katyn_massacre"
+        value: true
+        reason: "幸存于卡廷时期"
+      - op: dec
+        path: "sanity"
+        value: 15
+        reason: "目睹同伴消失的心理创伤"
+      - op: push
+        path: "war_stories"
+        value: "1940年春：目睹数百名波兰军官被带走，再也没有回来。我幸存下来，不知道为什么。"
+        reason: "卡廷的阴影"
+      - op: set
+        path: "morale"
+        value: 25
+        reason: "极度恐惧"
+    events:
+      - type: "tragedy"
+        message: "1940年春天，名单变得更加频繁。库比茨基没有回来，马利诺夫斯基也没有。你不再问他们去了哪里。你知道。"
+
+  - id: secret_school_in_prison
+    priority: 3
+    once: true
+    when: "flags.in_prison == true and sanity >= 50"
+    effects:
+      - op: inc
+        path: "military_skill"
+        value: 5
+        reason: "秘密学习"
+      - op: push
+        path: "war_stories"
+        value: "在战俘营参加秘密课程，学习战术和历史。"
+        reason: "保持尊严"
+      - op: inc
+        path: "morale"
+        value: 5
+        reason: "知识的慰藉"
+    events:
+      - type: "info"
+        message: "塔德乌什上尉在营房里开设秘密课堂。即使在地狱里，你们仍在学习如何战斗。"
+
+  - id: religious_crisis_in_prison
+    priority: 4
+    once: true
+    when: "flags.in_prison == true and flags.survived_katyn_massacre == true and flags.religious_crisis == false"
+    effects:
+      - op: set
+        path: "flags.religious_crisis"
+        value: true
+        reason: "信仰危机"
+      - op: dec
+        path: "sanity"
+        value: 10
+        reason: "对神的质疑"
+    events:
+      - type: "warning"
+        message: "你在夜间祈祷，但声音越来越轻。如果上帝存在，他为什么允许这一切发生？"
+
+  # ============================================
+  # 第二部分：巴巴罗萨与重生（1941）
+  # ============================================
+
+  - id: barbarossa_news
+    priority: 10
+    once: true
+    when: "year.year == 1941 and year.month >= 6 and flags.in_prison == true"
+    effects:
+      - op: set
+        path: "year.month"
+        value: 6
+        reason: "时间推进"
+      - op: set
+        path: "year.day"
+        value: 22
+        reason: "巴巴罗萨行动"
+      - op: inc
+        path: "morale"
+        value: 20
+        reason: "希望出现"
+      - op: push
+        path: "war_stories"
+        value: "1941年6月22日：德国入侵苏联。我们与苏联人成了盟友。"
+        reason: "历史转折"
+    events:
+      - type: "milestone"
+        message: "消息传来时，整个营地陷入了沉默，然后是难以置信的低语。德国入侵苏联。你们的敌人成了你们的盟友——或者说，你们的狱卒成了你们的战友。"
+
+  - id: sikorski_mayski_agreement
+    priority: 11
+    once: true
+    when: "year.year == 1941 and year.month >= 7 and flags.in_prison == true"
+    effects:
+      - op: set
+        path: "year.month"
+        value: 7
+        reason: "协定签署"
+      - op: set
+        path: "flags.in_prison"
+        value: false
+        reason: "获释"
+      - op: inc
+        path: "trust_soviet"
+        value: 10
+        reason: "苏联释放"
+      - op: push
+        path: "war_stories"
+        value: "1941年7月：西科尔斯基-迈斯基协定签署，我们被释放。"
+        reason: "重获自由"
+    events:
+      - type: "breakthrough"
+        message: "大门打开了。不是所有人都出去——有些人永远消失了——但你和瓦茨瓦夫、塔德乌什一起走出了科泽利斯克。阳光刺眼，你几乎忘记自由是什么味道。"
+
+  - id: kosciuszko_formation
+    priority: 12
+    once: true
+    when: "year.year == 1941 and trust_soviet >= 20 and flags.joined_kosciuszko == false"
+    effects:
+      - op: set
+        path: "flags.joined_kosciuszko"
+        value: true
+        reason: "加入科斯丘什科师"
+      - op: set
+        path: "unit"
+        value: "科斯丘什科师"
+        reason: "编入波兰第一师"
+      - op: set
+        path: "rank"
+        value: "列兵"
+        reason: "重新入伍"
+      - op: set
+        path: "location"
+        value: "苏德前线"
+        reason: "前往前线"
+      - op: inc
+        path: "morale"
+        value: 25
+        reason: "重获自由与武器"
+      - op: set
+        path: "equipment.uniform"
+        value: "波兰军服（苏式剪裁）"
+        reason: "重新着装"
+      - op: set
+        path: "equipment.rifle"
+        value: "莫辛-纳甘步枪"
+        reason: "获得武器"
+      - op: push
+        path: "war_stories"
+        value: "1941年8月：在瑟尔采集结，加入科斯丘什科师，重新成为战士。"
+        reason: "加入波兰军团"
+    events:
+      - type: "breakthrough"
+        message: "在瑟尔采，你再次穿上军装。旗帜上的波兰鹰徽与红星并列。这不是你梦想中的复国方式，但至少，你可以再次战斗——这一次，是对抗德国人。"
+
+  - id: anders_army_choice_missed
+    priority: 13
+    once: true
+    when: "year.year == 1942 and flags.joined_kosciuszko == true and flags.joined_red_army == false"
+    effects:
+      - op: push
+        path: "war_stories"
+        value: "1942年：安德斯军团开始组建，但我选择留在科斯丘什科师。"
+        reason: "选择的代价"
+    events:
+      - type: "info"
+        message: "你听说另一支波兰军队在组建——安德斯将军的军团，亲西方，最终将被派往意大利。你本可以加入他们，但你选择了留下。这是正确的决定吗？只有时间知道。"
+
+  # ============================================
+  # 第三部分：东线血战（1943-1944）
+  # ============================================
+
+  - id: battle_lenino_1943
+    priority: 20
+    once: true
+    when: "year.year == 1943 and year.month >= 10 and flags.joined_kosciuszko == true and combat_exp >= 2"
+    effects:
+      - op: set
+        path: "year.month"
+        value: 10
+        reason: "列宁诺战役"
+      - op: inc
+        path: "combat_exp"
+        value: 5
+        reason: "列宁诺战役"
+      - op: inc
+        path: "military_skill"
+        value: 10
+        reason: "实战经验"
+      - op: push
+        path: "battle_record"
+        value: "列宁诺战役（1943年10月12-13日）"
+        reason: "首次大规模作战"
+      - op: dec
+        path: "hp"
+        value: 25
+        reason: "战斗伤亡"
+      - op: inc
+        path: "wounds"
+        value: 1
+        reason: "负伤"
+      - op: set
+        path: "flags.wounded"
+        value: true
+        reason: "受伤标记"
+      - op: dec
+        path: "sanity"
+        value: 10
+        reason: "目睹死亡"
+      - op: push
+        path: "war_stories"
+        value: "1943年10月：列宁诺战役，波兰部队首次大规模作战。我幸存下来，但很多战友没有。"
+        reason: "记录战役"
+    events:
+      - type: "battle"
+        message: "列宁诺的白桦林里，你第一次与德军正面交锋。炮弹撕裂了树林，你的排伤亡过半。当撤退命令传来时，你拖着受伤的腿背着一个昏迷的战友下了火线。那天晚上，你第一次杀人——或者，那算是杀人吗？他只是向你的方向移动，你扣动了扳机。"
+
+  - id: meet_sofia_after_lenino
+    priority: 21
+    once: true
+    when: "flags.wounded == true and year.year == 1943 and flags.met_sofia == false"
+    effects:
+      - op: set
+        path: "flags.met_sofia"
+        value: true
+        reason: "遇见索菲亚"
+      - op: inc
+        path: "relationships.sofia"
+        value: 20
+        reason: "救命之恩"
+      - op: inc
+        path: "hp"
+        value: 20
+        reason: "得到救治"
+      - op: push
+        path: "war_stories"
+        value: "在野战医院认识护士索菲亚，她救了我的命。"
+        reason: "战火中的相遇"
+    events:
+      - type: "info"
+        message: "野战医院是一座被炸毁的教堂。索菲亚在烛光下为你取出弹片，她的手指稳定而温柔。'你运气很好，'她说，'弹片再偏一厘米...'她没有说完。你问她为什么当护士，她说：'有人必须照顾伤者，不管他们穿哪一方的制服。'"
+
+  - id: warsaw_uprising_1944
+    priority: 22
+    once: true
+    when: "year.year == 1944 and year.month >= 8 and flags.joined_kosciuszko == true"
+    effects:
+      - op: set
+        path: "year.month"
+        value: 8
+        reason: "华沙起义"
+      - op: set
+        path: "location"
+        value: "苏德前线"
+        reason: "华沙外围"
+      - op: inc
+        path: "combat_exp"
+        value: 3
+        reason: "维斯瓦河战斗"
+      - op: dec
+        path: "morale"
+        value: 20
+        reason: "无法援助华沙"
+      - op: dec
+        path: "sanity"
+        value: 15
+        reason: "目睹悲剧"
+      - op: push
+        path: "war_stories"
+        value: "1944年8月1日：华沙起义爆发，我们在河对岸战斗，却被命令停止前进。"
+        reason: "华沙之痛"
+    events:
+      - type: "tragedy"
+        message: "华沙在燃烧。你能看见旧城方向的浓烟，听到枪声和爆炸。维斯瓦河两岸，德国人和波兰家园军激战，而你们的部队被命令'休整'。斯大林希望德国人替他清除亲西方的抵抗力量。你看着对岸，握紧拳头，却什么也做不了。"
+
+  - id: save_warsaw_civilians
+    priority: 23
+    once: true
+    when: "year.year == 1944 and year.month == 8 and morale >= 40 and karma >= 10"
+    effects:
+      - op: set
+        path: "flags.saved_civilian"
+        value: true
+        reason: "救助平民"
+      - op: inc
+        path: "karma"
+        value: 15
+        reason: "善行"
+      - op: inc
+        path: "morale"
+        value: 10
+        reason: "拯救生命的意义"
+      - op: push
+        path: "war_stories"
+        value: "华沙起义期间，违令帮助了游过维斯瓦河逃出的平民。"
+        reason: "人性的微光"
+    events:
+      - type: "breakthrough"
+        message: "夜里，你发现一群游过维斯瓦河的人——妇女、儿童、老人，浑身湿透，瑟瑟发抖。你本应按命令将他们送交苏联当局，但你给了他们食物、干衣服，并指了一条通往南方的路。其中一个老妇人握住你的手说：'谢谢你，波兰的儿子。'"
+
+  - id: first_promotion
+    priority: 24
+    once: true
+    when: "combat_exp >= 8 and trust_soviet >= 50 and flags.promoted == false"
+    effects:
+      - op: set
+        path: "flags.promoted"
+        value: true
+        reason: "获得晋升"
+      - op: set
+        path: "rank"
+        value: "下士"
+        reason: "战功与信任"
+      - op: inc
+        path: "leadership"
+        value: 10
+        reason: "晋升责任"
+      - op: inc
+        path: "morale"
+        value: 10
+        reason: "获得认可"
+      - op: push
+        path: "war_stories"
+        value: "晋升为下士，开始指挥一个小队。"
+        reason: "认可"
+    events:
+      - type: "info"
+        message: "彼得罗夫中校拍拍你的肩膀：'科瓦尔斯基，你现在是下士了。'军衔的星星在你肩上，你知道这意味着更多的责任，也是更多的妥协。瓦茨瓦夫看着你，眼神复杂——为你高兴，但也担心这意味着你会离他越来越远。"
+
+  - id: winter_1944_retreat
+    priority: 25
+    once: true
+    when: "year.year == 1944 and year.month >= 12 and hp <= 50"
+    effects:
+      - op: set
+        path: "weather"
+        value: "严寒"
+        reason: "冬季"
+      - op: dec
+        path: "morale"
+        value: 10
+        reason: "严冬"
+      - op: inc
+        path: "wounds"
+        value: 1
+        reason: "冻伤"
+      - op: set
+        path: "disease"
+        value: "冻伤"
+        reason: "严寒"
+    events:
+      - type: "warning"
+        message: "1944年的冬天异常严酷。你在华沙附近的森林里作战，脚趾失去了知觉。不是每一个冻伤的人都能保住脚。"
+
+  # ============================================
+  # 第四部分：远东之路（1945）
+  # ============================================
+
+  - id: transfer_to_far_east_decision
+    priority: 30
+    once: true
+    when: "year.year == 1945 and year.month >= 1 and combat_exp >= 10 and flags.sent_to_far_east == false"
+    effects:
+      - op: set
+        path: "flags.sent_to_far_east"
+        value: true
+        reason: "调往远东"
+      - op: set
+        path: "location"
+        value: "远东"
+        reason: "前往远东"
+      - op: set
+        path: "unit"
+        value: "远东第1方面军"
+        reason: "编入远东部队"
+      - op: inc
+        path: "trust_soviet"
+        value: 10
+        reason: "被选中执行特殊任务"
+      - op: push
+        path: "war_stories"
+        value: "1945年1月：接到调令，前往远东准备对日作战。"
+        reason: "远东之路"
+      - op: dec
+        path: "morale"
+        value: 15
+        reason: "远离欧洲，思念家乡"
+      - op: set
+        path: "flags.homesick"
+        value: true
+        reason: "思乡之情"
+    events:
+      - type: "milestone"
+        message: "命令下来了：你被调往远东。雅尔塔会议刚刚结束，苏联承诺对日作战。你——作为'有经验的欧洲战场老兵'——被选中参加这场新的战争。瓦茨瓦夫和你同乘一列火车，但塔德乌什选择留下。'有人在欧洲守望着，'他说，'波兰不能被人遗忘。'"
+
+  - id: trans_siberian_railway
+    priority: 31
+    once: true
+    when: "flags.sent_to_far_east == true and location == '远东'"
+    effects:
+      - op: inc
+        path: "languages.russian"
+        value: 15
+        reason: "旅途中学习"
+      - op: set
+        path: "flags.learned_russian"
+        value: true
+        reason: "学会俄语"
+      - op: dec
+        path: "morale"
+        value: 5
+        reason: "漫长旅途"
+      - op: push
+        path: "war_stories"
+        value: "穿越西伯利亚：七天七夜的火车，贝加尔湖的蓝冰，无尽的针叶林。"
+        reason: "旅途"
+    events:
+      - type: "info"
+        message: "七天七夜，火车穿越整个西伯利亚。你经过乌拉尔山脉，经过鄂木斯克、新西伯利亚，经过贝加尔湖——那是一片蓝色的冰原，美得让你忘记了呼吸。瓦茨瓦夫在车厢里教萨沙翻译下国际象棋，你看着窗外的风景，知道自己离波兰越来越远，远到可能永远无法回去。"
+
+  - id: arrive_khabarovsk
+    priority: 32
+    once: true
+    when: "flags.sent_to_far_east == true and location == '远东' and flags.met_zarina == false"
+    effects:
+      - op: set
+        path: "location"
+        value: "伯力"
+        reason: "到达伯力"
+      - op: set
+        path: "flags.met_zarina"
+        value: true
+        reason: "遇见扎里娜"
+      - op: inc
+        path: "relationships.zarina"
+        value: 25
+        reason: "初次相遇"
+      - op: inc
+        path: "morale"
+        value: 10
+        reason: "新的希望"
+    events:
+      - type: "info"
+        message: "伯力（哈巴罗夫斯克），黑龙江与乌苏里江交汇处。这里比莫斯科更东方，比北京更北方。在军营的卫生所，你遇见了扎里娜·伊斯梅洛娃——卫生员，鞑靼人，会说一点波兰语，因为她祖父是被流放西伯利亚的波兰人。'Dzień dobry，'她用蹩脚的波兰语说，'我练习。'你笑了，这是很久以来的第一次。"
+
+  - id: learn_korean_phrases
+    priority: 33
+    once: true
+    when: "flags.sent_to_far_east == true and location == '伯力' and flags.learned_korean == false"
+    effects:
+      - op: inc
+        path: "languages.korean"
+        value: 10
+        reason: "学习基础"
+      - op: set
+        path: "flags.learned_korean"
+        value: true
+        reason: "学会基础"
+    events:
+      - type: "info"
+        message: "在伯力，你开始学习一些基础的朝鲜语——问候、数字、'放下武器'、'不要害怕'。你不知道这些词语很快就会有用了。"
+
+  - id: love_in_far_east
+    priority: 34
+    once: true
+    when: "flags.met_zarina == true and morale >= 50 and sanity >= 60 and flags.found_love == false"
+    effects:
+      - op: set
+        path: "flags.found_love"
+        value: true
+        reason: "找到爱情"
+      - op: inc
+        path: "relationships.zarina"
+        value: 40
+        reason: "深化的感情"
+      - op: inc
+        path: "morale"
+        value: 15
+        reason: "爱情的慰藉"
+      - op: inc
+        path: "sanity"
+        value: 10
+        reason: "精神支持"
+      - op: push
+        path: "war_stories"
+        value: "在伯力与扎里娜相爱。战争中最不可能的地方，找到了温暖。"
+        reason: "战火中的爱"
+    events:
+      - type: "breakthrough"
+        message: "在伯力的那个月，你和扎里娜之间有了某种东西。也许只是因为孤独，也许只是因为知道死亡可能就在转角。但当她把手放在你的手上时，你感到一种久违的平静。'战后，'她说，'你想去哪里？'你没有答案，但你们一起想象了一个没有战争的未来。"
+
+  # ============================================
+  # 第五部分：八月风暴（1945年8月）
+  # ============================================
+
+  - id: soviet_declaration_war
+    priority: 40
+    once: true
+    when: "year.year == 1945 and year.month >= 8 and flags.sent_to_far_east == true"
+    effects:
+      - op: set
+        path: "year.month"
+        value: 8
+        reason: "八月风暴"
+      - op: set
+        path: "year.day"
+        value: 9
+        reason: "进攻开始"
+      - op: inc
+        path: "combat_exp"
+        value: 2
+        reason: "战役开始"
+      - op: push
+        path: "war_stories"
+        value: "1945年8月8日：苏联对日宣战。8月9日，进攻开始。"
+        reason: "最后的战役"
+    events:
+      - type: "milestone"
+        message: "1945年8月8日，苏联对日宣战。你在伯力的营房里听到广播，然后是欢呼声。三天后，欧洲战争的胜利；现在，最后的敌人。你穿上军装，检查武器。六年的战争，终于要结束了——或者，最后的考验刚刚开始。"
+
+  - id: manchuria_campaign_start
+    priority: 41
+    once: true
+    when: "year.year == 1945 and year.month == 8 and flags.sent_to_far_east == true and flags.fought_in_manchuria == false"
+    effects:
+      - op: set
+        path: "flags.fought_in_manchuria"
+        value: true
+        reason: "参加满洲战役"
+      - op: set
+        path: "location"
+        value: "满洲"
+        reason: "进入中国东北"
+      - op: set
+        path: "weather"
+        value: "下雨"
+        reason: "东北雨季"
+      - op: inc
+        path: "combat_exp"
+        value: 5
+        reason: "满洲战斗"
+      - op: push
+        path: "battle_record"
+        value: "满洲战役（1945年8月9-20日）"
+        reason: "远东作战"
+      - op: push
+        path: "war_stories"
+        value: "1945年8月9日：越过中苏边境，向满洲里推进。"
+        reason: "记录战役"
+    events:
+      - type: "battle"
+        message: "1945年8月9日零时，炮火照亮了满洲里的夜空。你坐在T-34坦克后面，穿越草原。关东军比想象中顽强，但他们已经被时间抛弃了。你经过被摧毁的日军碉堡，经过投降的士兵，经过逃难的日本开拓团平民。这是战争，但也是一种结束。"
+
+  - id: liberate_labor_camp
+    priority: 42
+    once: true
+    when: "flags.fought_in_manchuria == true and karma >= 10 and flags.saved_civilian == false"
+    effects:
+      - op: set
+        path: "flags.saved_civilian"
+        value: true
+        reason: "解放劳工营"
+      - op: inc
+        path: "karma"
+        value: 20
+        reason: "拯救生命"
+      - op: inc
+        path: "morale"
+        value: 15
+        reason: "正义之举"
+      - op: inc
+        path: "relationships.chinese_civilians"
+        value: 40
+        reason: "拯救中国劳工"
+      - op: inc
+        path: "relationships.korean_civilians"
+        value: 30
+        reason: "拯救朝鲜劳工"
+      - op: push
+        path: "war_stories"
+        value: "解放了一个关押朝鲜和中国劳工的日军集中营。"
+        reason: "人性的胜利"
+    events:
+      - type: "breakthrough"
+        message: "在齐齐哈尔附近，你们发现了一个日军劳工营。里面关押着数百名朝鲜和中国平民，被强迫修建军事工事。当你打开铁丝网大门时，一个老人跪下来亲吻你的军靴。你说不，不要这样，你是来解放他们的。那一刻，你感到六年来第一次，这场战争有了意义。"
+
+  - id: meet_kim_guerrilla
+    priority: 43
+    once: true
+    when: "flags.fought_in_manchuria == true and location == '满洲' and flags.met_kim == false"
+    effects:
+      - op: set
+        path: "flags.met_kim"
+        value: true
+        reason: "遇见金"
+      - op: inc
+        path: "relationships.kim_guerrilla"
+        value: 30
+        reason: "合作"
+      - op: push
+        path: "secrets_known"
+        value: "朝鲜游击队在满洲活动的情报网络"
+        reason: "获得情报"
+    events:
+      - type: "info"
+        message: "在哈尔滨附近，你遇见了金——朝鲜抗日游击队员。他沉默寡言，但眼睛里有钢铁。他用流利的中文和俄语与你交谈，告诉你关于日军部署的情报。'我们打了十五年，'他说，'你们来了，战争结束了。但我们的战斗才刚刚开始。'你不完全理解他的话，但你知道，这个人将在战后扮演重要角色。"
+
+  - id: wang_farmer_encounter
+    priority: 44
+    once: true
+    when: "flags.fought_in_manchuria == true and location == '满洲' and flags.met_wang == false"
+    effects:
+      - op: set
+        path: "flags.met_wang"
+        value: true
+        reason: "遇见王"
+      - op: inc
+        path: "relationships.wang_farmer"
+        value: 25
+        reason: "相遇"
+    events:
+      - type: "info"
+        message: "王大山，中国东北农民，45岁。他的全家在日军'集家并村'政策中被杀害。当你遇见他时，他正在废墟中寻找什么东西——也许只是回忆。'我没有眼泪了，'他说，'只有仇恨。'你给了他食物，他给了你庇护。在满洲的荒野中，你们用破碎的语言交流，分享烟草，共同度过了一个寒冷的夜晚。"
+
+  - id: japanese_surrender
+    priority: 45
+    once: true
+    when: "year.year == 1945 and year.month == 8 and year.day >= 15 and flags.fought_in_manchuria == true"
+    effects:
+      - op: set
+        path: "year.day"
+        value: 15
+        reason: "日本投降"
+      - op: inc
+        path: "morale"
+        value: 25
+        reason: "战争结束"
+      - op: push
+        path: "war_stories"
+        value: "1945年8月15日：日本宣布投降。我们听到了广播。"
+        reason: "胜利"
+    events:
+      - type: "milestone"
+        message: "1945年8月15日，收音机里传来天皇的声音。日本投降了。你周围的士兵欢呼、拥抱、哭泣。瓦茨瓦夫抓住你的肩膀：'结束了，扬！结束了！'你点头，但你不知道这是不是真的结束。在欧洲，德国投降三个月后，战争才正式结束；在这里，又会怎样？"
+
+  # ============================================
+  # 第六部分：解放朝鲜（1945年8月末）
+  # ============================================
+
+  - id: advance_to_korea
+    priority: 50
+    once: true
+    when: "flags.fought_in_manchuria == true and combat_exp >= 15 and flags.liberated_korea == false"
+    effects:
+      - op: set
+        path: "flags.liberated_korea"
+        value: true
+        reason: "解放朝鲜"
+      - op: set
+        path: "location"
+        value: "朝鲜"
+        reason: "进入朝鲜"
+      - op: set
+        path: "unit"
+        value: "第25集团军"
+        reason: "编入第25集团军"
+      - op: inc
+        path: "combat_exp"
+        value: 3
+        reason: "朝鲜作战"
+      - op: push
+        path: "battle_record"
+        value: "平壤解放（1945年8月24日）"
+        reason: "最终战役"
+      - op: inc
+        path: "morale"
+        value: 20
+        reason: "战争结束"
+      - op: set
+        path: "flags.decorated"
+        value: true
+        reason: "获得勋章"
+      - op: push
+        path: "war_stories"
+        value: "1945年8月24日：参与解放平壤，战争终于结束。"
+        reason: "胜利"
+    events:
+      - type: "victory"
+        message: "平壤，大同江畔。你站在河堤上，看着苏联和朝鲜的旗帜并肩升起。六年，从维斯瓦河到大同江，从战俘到胜利者。瓦茨瓦夫递给你一杯伏特加：'为了那些没能看到这一天的人。'你仰头喝下，想起科泽利斯克的修士院，列宁诺的白桦林，华沙的浓烟，西伯利亚的铁路。战争结束了。"
+
+  - id: last_battle_sacrifice
+    priority: 51
+    once: true
+    when: "flags.liberated_korea == true and flags.lost_comrade == false"
+    effects:
+      - op: set
+        path: "flags.lost_comrade"
+        value: true
+        reason: "失去战友"
+      - op: dec
+        path: "morale"
+        value: 15
+        reason: "丧友之痛"
+      - op: dec
+        path: "sanity"
+        value: 10
+        reason: "创伤"
+      - op: push
+        path: "war_stories"
+        value: "在平壤附近的最后战斗中，失去了亲爱的战友。"
+        reason: "最后的代价"
+    events:
+      - type: "tragedy"
+        message: "在平壤郊外的最后几天，仍有日军部队拒绝投降。瓦茨瓦夫在一次交火中倒下了——不是被子弹，而是被一枚隐藏的地雷。你抱着他，看着他生命流逝。'告诉我的母亲...'他没有说完。你握着他的手，直到它变冷。战争结束了，但它仍然索取代价。"
+
+  - id: post_war_choice
+    priority: 52
+    once: true
+    when: "flags.liberated_korea == true and morale >= 40"
+    effects:
+      - op: set
+        path: "flags.returned_poland"
+        value: true
+        reason: "准备归国"
+      - op: push
+        path: "war_stories"
+        value: "1945年末：等待遣返，准备回到阔别六年的波兰。"
+        reason: "归途"
+    events:
+      - type: "milestone"
+        message: "战争结束了，但你的故事还没有。你现在面临选择：回到波兰——现在是一个被苏联控制的社会主义国家，还是留在东方——也许和扎里娜在一起？或者去西方，像塔德乌什那样选择流亡？每个选择都有代价。"
+
+  # ============================================
+  # 状态触发器
+  # ============================================
+
+  - id: low_morale_warning
+    priority: 100
+    once: false
+    when: "morale <= 20 and morale > 0 and flags.disillusioned == false"
+    effects:
+      - op: set
+        path: "flags.disillusioned"
+        value: true
+        reason: "士气低落"
+    events:
+      - type: "warning"
+        message: "你的精神濒临崩溃。继续这样下去，你可能会做出无法挽回的选择——逃亡、自杀、或者更糟。"
+
+  - id: sanity_crisis
+    priority: 101
+    once: false
+    when: "sanity <= 20 and sanity > 0 and flags.traumatized == false"
+    effects:
+      - op: set
+        path: "flags.traumatized"
+        value: true
+        reason: "创伤后应激"
+      - op: dec
+        path: "military_skill"
+        value: 10
+        reason: "判断力下降"
+    events:
+      - type: "danger"
+        message: "你开始做噩梦，梦见列宁诺的白桦林，梦见华沙的浓烟，梦见瓦茨瓦夫的眼睛。白天，你听到不存在的声音，看到不存在的 movement。你需要帮助，但在这个时代，谁会帮助一个破碎的士兵？"
+
+  - id: high_karma_reward
+    priority: 102
+    once: true
+    when: "karma >= 50 and flags.decorated == false"
+    effects:
+      - op: inc
+        path: "trust_soviet"
+        value: 15
+        reason: "道德声誉"
+      - op: inc
+        path: "morale"
+        value: 10
+        reason: "问心无愧"
+    events:
+      - type: "info"
+        message: "你的善良没有被忽视。士兵们尊敬你，即使是苏联指挥官也注意到了你的'人道主义精神'。在这个残酷的时代，保持人性本身就是一种英雄主义。"
+
+  - id: low_karma_consequence
+    priority: 103
+    once: true
+    when: "karma <= -30 and flags.informed_on_comrade == true"
+    effects:
+      - op: dec
+        path: "morale"
+        value: 20
+        reason: "内疚"
+      - op: dec
+        path: "sanity"
+        value: 15
+        reason: "道德煎熬"
+      - op: dec
+        path: "relationships.polish_comrades"
+        value: 40
+        reason: "被孤立"
+    events:
+      - type: "danger"
+        message: "你的背叛带来了后果。波兰战友们疏远你，用鄙视的眼神看你。夜里，你梦见被你出卖的人。你开始怀疑自己是否还是人类，或者只是权力的工具。"
+
+  - id: polish_identity_vs_soviet_trust_conflict
+    priority: 104
+    once: true
+    when: "polish_identity >= 70 and trust_soviet >= 70 and flags.protected_polish == false"
+    effects:
+      - op: dec
+        path: "polish_identity"
+        value: 10
+        reason: "身份矛盾"
+      - op: dec
+        path: "sanity"
+        value: 10
+        reason: "精神分裂"
+    events:
+      - type: "warning"
+        message: "你站在刀锋上。苏联人信任你，但波兰战友们开始怀疑你。每一次与苏联指挥官的友好交谈，都让你离你的根更远。你能同时忠诚于两者吗？还是说，最终你必须选择？"
+
+  - id: language_skill_benefit
+    priority: 105
+    once: true
+    when: "languages.russian >= 50 and flags.learned_russian == true"
+    effects:
+      - op: inc
+        path: "trust_soviet"
+        value: 10
+        reason: "语言沟通"
+      - op: inc
+        path: "leadership"
+        value: 5
+        reason: "沟通能力"
+    events:
+      - type: "info"
+        message: "你的俄语进步很快。现在你可以直接与苏联指挥官交流，不再需要翻译。这给你带来了优势，但也让你更加融入这个你不确定的体制。"
+
+  - id: food_shortage_crisis
+    priority: 106
+    once: false
+    when: "rations <= 1 and location != '伯力'"
+    effects:
+      - op: dec
+        path: "hp"
+        value: 10
+        reason: "饥饿"
+      - op: dec
+        path: "morale"
+        value: 10
+        reason: "食物短缺"
+    events:
+      - type: "warning"
+        message: "你的口粮几乎耗尽。饥饿开始影响你的身体和判断。你需要找到食物，无论是通过补给、交易，还是其他手段。"
+
+  - id: equipment_upgrade
+    priority: 107
+    once: true
+    when: "combat_exp >= 10 and flags.promoted == true"
+    effects:
+      - op: set
+        path: "equipment.rifle"
+        value: "SVT-40半自动步枪"
+        reason: "获得新武器"
+      - op: set
+        path: "equipment.helmet"
+        value: "SSH-36钢盔"
+        reason: "获得头盔"
+    events:
+      - type: "info"
+        message: "随着晋升，你获得了更好的装备。SVT-40比莫辛-纳甘更先进，但你也知道，更好的武器意味着更大的责任，也意味着被派往更危险的地方。"
+
+  - id: harsh_winter_effect
+    priority: 108
+    once: false
+    when: "weather == '严寒' and equipment.uniform == '波兰军服（苏式剪裁）'"
+    effects:
+      - op: dec
+        path: "hp"
+        value: 5
+        reason: "严寒"
+      - op: set
+        path: "disease"
+        value: "感冒"
+        reason: "受冻"
+    events:
+      - type: "warning"
+        message: "严寒无情。即使是苏式冬装也不足以抵挡西伯利亚或满洲的冬天。你感到体温流失，手指麻木。如果不尽快找到庇护，你会冻死。"
+
+  # ============================================
+  # 结局触发器
+  # ============================================
+
+  - id: ending_hero_return
+    priority: 200
+    once: true
+    when: "flags.returned_poland == true and combat_exp >= 20 and karma >= 30 and flags.decorated == true"
+    effects:
+      - op: push
+        path: "war_stories"
+        value: "结局：以英雄身份返回波兰，但知道真正的挑战才刚刚开始。"
+        reason: "英雄结局"
+    events:
+      - type: "victory"
+        message: "你回到了波兰，带着勋章和伤痕。人民军需要你这样的老兵，但你也知道，这个被苏联控制的波兰，不是你为之战斗的那个波兰。1956年，你可能因'民族主义倾向'被边缘化；但你的故事会被记住——作为那个从维斯瓦河到大同江，始终保持人性的波兰儿子。"
+
+  - id: ending_exile
+    priority: 201
+    once: true
+    when: "flags.returned_poland == false and karma >= 20 and flags.protected_polish == true"
+    effects:
+      - op: set
+        path: "location"
+        value: "返回波兰"
+        reason: "另一种回归"
+    events:
+      - type: "victory"
+        message: "你没有选择回到苏联控制的波兰。通过复杂的渠道，你最终到达伦敦，与塔德乌什重逢。你们在流亡的波兰社区中度过余生，永远怀念那个你们无法回归的祖国。你的日记成为历史见证，记录了卡廷、华沙、远东——那些官方历史不愿提及的真相。"
+
+  - id: ending_love_in_east
+    priority: 202
+    once: true
+    when: "flags.found_love == true and flags.returned_poland == false"
+    effects:
+      - op: push
+        path: "war_stories"
+        value: "结局：选择与扎里娜留在东方，开始新生活。"
+        reason: "爱情结局"
+    events:
+      - type: "victory"
+        message: "你和扎里娜没有回到欧洲。你们在哈萨克斯坦的一个小镇定居，远离政治，远离战争的记忆。你有三个孩子，他们会说波兰语、俄语和鞑靼语。1962年，中苏决裂，你们再次成为'不可靠分子'，被迫迁移。但你们始终在一起。这不是你想象中的结局，但它是你的选择。"
+
+  - id: ending_tragic_death
+    priority: 203
+    once: true
+    when: "hp <= 0 and flags.liberated_korea == false"
+    effects: []
+    events:
+      - type: "end"
+        message: "你没有看到战争的结束。也许是在列宁诺的白桦林，也许是在华沙的河岸上，也许是在满洲的荒野中。你的名字会被刻在纪念碑上——如果有纪念碑的话。瓦茨瓦夫会写信给你的母亲，如果他能找到她的地址。战争吞噬了又一个年轻的生命，而历史继续前行。"
+
+  - id: ending_broken_survivor
+    priority: 204
+    once: true
+    when: "flags.returned_poland == true and sanity <= 30 and flags.traumatized == true"
+    effects: []
+    events:
+      - type: "end"
+        message: "你回到了波兰，但你的一部分永远留在了东线。你无法工作，无法入睡，无法与任何人建立联系。你酗酒，你尖叫着从梦中惊醒。1970年代，有人找到你，想记录你的故事，但你拒绝了。有些记忆太沉重，无法分享。你于1985年去世，默默无闻，只有你的日记——如果你写下了它——见证了那个从维斯瓦河到大同江的旅程。"
+
+  - id: ending_traitor_guilt
+    priority: 205
+    once: true
+    when: "flags.returned_poland == true and karma <= -40 and flags.informed_on_comrade == true"
+    effects: []
+    events:
+      - type: "end"
+        message: "你选择了生存，选择了晋升，选择了背叛。战后，你成为波兰人民共和国安全部门的一名军官，参与迫害那些你曾经的战友。你有公寓，有汽车，有权力。但夜里，你梦见他们的脸。1956年解冻后，你的罪被揭露，你被监禁、被唾弃。你的家人否认你。你死于1962年，孤独而恐惧，知道历史会记住你——作为反面。"
+
+  - id: true_victory
+    priority: 206
+    once: true
+    when: "flags.liberated_korea == true and karma >= 40 and flags.saved_civilian == true and flags.protected_polish == true and flags.found_love == true"
+    effects: []
+    events:
+      - type: "victory"
+        message: "这是一个罕见的完美结局。你不仅幸存下来，还保持了人性、尊严和爱。你的故事会成为传说——那个在地狱中仍能帮助他人、在背叛的时代仍保持忠诚、在绝望中仍能找到爱的波兰士兵。无论你最终选择回到波兰、留在东方还是去西方，你都知道，你赢得了比战争更重要的东西：你自己的灵魂。"
