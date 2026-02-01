@@ -10,6 +10,12 @@ python -m cbse
 
 Defaults to the Mock LLM (offline friendly).
 
+Run a specific game:
+
+```bash
+python -m cbse --game polish_solider
+```
+
 ## LLM Provider
 
 Select via environment variables:

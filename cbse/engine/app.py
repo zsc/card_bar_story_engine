@@ -116,7 +116,7 @@ class CardBarApp(App):
     #input { height: 3; }
     """
 
-    def __init__(self, replay_file: str | None = None) -> None:
+    def __init__(self, replay_file: str | None = None, game_id: str = "mist_harbor") -> None:
         super().__init__()
         self.base_dir = Path(__file__).resolve().parents[2]
         self.content_loader = ContentLoader(self.base_dir / "games")
@@ -137,6 +137,7 @@ class CardBarApp(App):
         self.replay_file = replay_file
         self.replay_inputs: list[str] = []
         self.replay_active: bool = False
+        self.game_id = game_id
 
     def compose(self) -> ComposeResult:
         yield Static("", id="header")
@@ -151,7 +152,7 @@ class CardBarApp(App):
         yield Footer()
 
     def on_mount(self) -> None:
-        self.load_game("mist_harbor")
+        self.load_game(self.game_id)
         self.refresh_ui()
         if self.replay_file:
             self._start_replay(self.replay_file)
@@ -451,6 +452,7 @@ class CardBarApp(App):
 
 def main() -> None:
     parser = argparse.ArgumentParser()
+    parser.add_argument("--game", dest="game", default="mist_harbor", help="Game id under games/")
     parser.add_argument("--replay", dest="replay", help="Replay input bag file")
     args, _ = parser.parse_known_args()
-    CardBarApp(replay_file=args.replay).run()
+    CardBarApp(replay_file=args.replay, game_id=args.game).run()
