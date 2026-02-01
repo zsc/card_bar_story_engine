@@ -75,7 +75,8 @@ class RulesEngine:
         )
 
     def _apply_update(self, state: dict[str, Any], update: StateUpdateOp, allow_readonly: bool) -> bool:
-        root = update.path.split(".")[0]
+        path = update.path.lstrip("/")
+        root = path.split(".")[0]
         if root not in self.variables:
             return False
         var_def = self.variables[root]
@@ -85,7 +86,7 @@ class RulesEngine:
             return False
 
         try:
-            current_value = deep_get(state, update.path)
+            current_value = deep_get(state, path)
         except PathError:
             return False
 
@@ -95,18 +96,18 @@ class RulesEngine:
                 return False
             delta = float(update.value)
             new_value = float(current_value) + (delta if op == "inc" else -delta)
-            if self._is_integer(var_def, update.path, state):
+            if self._is_integer(var_def, path, state):
                 new_value = int(round(new_value))
-            deep_set(state, update.path, new_value)
+            deep_set(state, path, new_value)
             return True
 
         if op == "set":
-            if not self._check_value_type(var_def, update.path, update.value, state):
+            if not self._check_value_type(var_def, path, update.value, state):
                 return False
             value = update.value
-            if self._is_integer(var_def, update.path, state) and is_number(value):
+            if self._is_integer(var_def, path, state) and is_number(value):
                 value = int(round(value))
-            deep_set(state, update.path, value)
+            deep_set(state, path, value)
             return True
 
         if op == "push":
@@ -125,7 +126,7 @@ class RulesEngine:
         if op == "toggle":
             if not isinstance(current_value, bool):
                 return False
-            deep_set(state, update.path, not current_value)
+            deep_set(state, path, not current_value)
             return True
 
         return False
