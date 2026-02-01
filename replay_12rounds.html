@@ -1,0 +1,1079 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>雾港回声 - 12轮游戏回放</title>
+    <style>
+        :root {
+            --bg-dark: #0a0a0f;
+            --bg-card: #12121a;
+            --bg-elevated: #1a1a25;
+            --accent: #6366f1;
+            --accent-glow: rgba(99, 102, 241, 0.3);
+            --text-primary: #e2e8f0;
+            --text-secondary: #94a3b8;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --success: #10b981;
+            --border: #2d2d3a;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: var(--bg-dark);
+            color: var(--text-primary);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #1e1b4b 0%, #0f0f1a 100%);
+            padding: 2rem;
+            text-align: center;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            background: linear-gradient(135deg, #818cf8, #c084fc);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 0.5rem;
+        }
+        
+        .header .subtitle {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+        }
+        
+        .stats-bar {
+            display: flex;
+            justify-content: center;
+            gap: 3rem;
+            padding: 1.5rem;
+            background: var(--bg-card);
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .stat {
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--accent);
+        }
+        
+        .stat-label {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .timeline {
+            max-width: 900px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+        
+        .round-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            margin-bottom: 1.5rem;
+            overflow: hidden;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        .round-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+        }
+        
+        .round-header {
+            background: var(--bg-elevated);
+            padding: 1rem 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .round-number {
+            background: var(--accent);
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+        
+        .round-input {
+            flex: 1;
+        }
+        
+        .round-input-label {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .round-input-value {
+            font-size: 1.1rem;
+            color: var(--text-primary);
+        }
+        
+        .round-body {
+            padding: 1.5rem;
+        }
+        
+        .narrative {
+            background: rgba(99, 102, 241, 0.05);
+            border-left: 3px solid var(--accent);
+            padding: 1rem 1.25rem;
+            border-radius: 0 8px 8px 0;
+            margin-bottom: 1rem;
+            font-size: 1rem;
+            line-height: 1.8;
+            white-space: pre-wrap;
+        }
+        
+        .choices-section {
+            margin-top: 1rem;
+        }
+        
+        .section-title {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 0.75rem;
+        }
+        
+        .choices-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        
+        .choice-item {
+            background: var(--bg-elevated);
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        
+        .choice-number {
+            background: var(--accent);
+            color: white;
+            width: 24px;
+            height: 24px;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+        
+        .choice-text {
+            flex: 1;
+        }
+        
+        .choice-label {
+            font-weight: 500;
+        }
+        
+        .choice-hint {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+        
+        .risk-badge {
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            font-weight: bold;
+        }
+        
+        .risk-low { background: rgba(16, 185, 129, 0.2); color: var(--success); }
+        .risk-medium { background: rgba(245, 158, 11, 0.2); color: var(--warning); }
+        .risk-high { background: rgba(239, 68, 68, 0.2); color: var(--danger); }
+        
+        .events-section {
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--border);
+        }
+        
+        .event-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: var(--bg-elevated);
+            padding: 0.35rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            margin-right: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .event-icon {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+        
+        .timeline-line {
+            position: absolute;
+            left: 50%;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: var(--border);
+            transform: translateX(-50%);
+        }
+        
+        .progress-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--accent), #c084fc);
+            z-index: 100;
+            transition: width 0.3s;
+        }
+        
+        @media (max-width: 768px) {
+            .stats-bar {
+                gap: 1.5rem;
+            }
+            .header h1 {
+                font-size: 1.75rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="progress-bar" id="progressBar"></div>
+    
+    <header class="header">
+        <h1>🌫️ 雾港回声</h1>
+        <p class="subtitle">AI 叙事游戏 - 12 轮游玩记录</p>
+        <p style="color: var(--text-secondary); margin-top: 0.5rem; font-size: 0.9rem;">
+            模型: gemma3:4b via Ollama | 提供商: Ollama
+        </p>
+    </header>
+    
+    <div class="stats-bar">
+        <div class="stat">
+            <div class="stat-value">12</div>
+            <div class="stat-label">总回合</div>
+        </div>
+        <div class="stat">
+            <div class="stat-value">雾港</div>
+            <div class="stat-label">游戏世界</div>
+        </div>
+        <div class="stat">
+            <div class="stat-value"> noir</div>
+            <div class="stat-label">风格</div>
+        </div>
+    </div>
+    
+    <div class="timeline">
+
+        <div class="round-card" id="round-1">
+            <div class="round-header">
+                <div class="round-number">1</div>
+                <div class="round-input">
+                    <div class="round-input-label">玩家行动</div>
+                    <div class="round-input-value">1</div>
+                </div>
+            </div>
+            <div class="round-body">
+                <div class="narrative">你坐在鸦巢酒吧的角落里，一杯劣质啤酒在桌上冒着泡。空气中弥漫着酒精和汗水，嘈杂的喧嚣几乎掩盖了你脑海中挥之不去的疑问。你决定继续调查停电事件，从酒吧里开始询问顾客。
+
+你看到一个穿着油腻外套的男人正坐在吧台边，低声灌着啤酒。他看起来像是个老水手，眼神游离不定。
+
+你觉得该怎么做？
+
+1. 接近那个油腻的男人，尝试和他聊聊。
+2. 向酒保询问关于那个男人的信息。
+3. 继续观察酒吧的其他顾客，寻找任何可疑人物。</div>
+                
+                <div class="choices-section">
+                    <div class="section-title">可选行动</div>
+                    <div class="choices-list">
+                        
+        <div class="choice-item">
+            <div class="choice-number">1</div>
+            <div class="choice-text">
+                <div class="choice-label">接近那个油腻的男人，尝试和他聊聊。 </div>
+                <div class="choice-hint">与油腻的男人交流，获取线索。 </div>
+            </div>
+            <span class="risk-badge risk-low">low</span>
+        </div>
+        
+        <div class="choice-item">
+            <div class="choice-number">2</div>
+            <div class="choice-text">
+                <div class="choice-label">向酒保询问关于那个男人的信息。</div>
+                <div class="choice-hint">酒保可能知道更多关于这个男人的信息。</div>
+            </div>
+            <span class="risk-badge risk-low">low</span>
+        </div>
+        
+        <div class="choice-item">
+            <div class="choice-number">3</div>
+            <div class="choice-text">
+                <div class="choice-label">继续观察酒吧的其他顾客，寻找任何可疑人物。</div>
+                <div class="choice-hint">也许其他顾客会提供线索。</div>
+            </div>
+            <span class="risk-badge risk-low">low</span>
+        </div>
+        
+        <div class="choice-item">
+            <div class="choice-number">4</div>
+            <div class="choice-text">
+                <div class="choice-label">离开酒吧，去旧电厂附近寻找线索。</div>
+                <div class="choice-hint">也许在电厂附近能找到什么。</div>
+            </div>
+            <span class="risk-badge risk-medium">medium</span>
+        </div>
+        
+        <div class="choice-item">
+            <div class="choice-number">5</div>
+            <div class="choice-text">
+                <div class="choice-label">检查酒吧的监控录像。</div>
+                <div class="choice-hint">可能监控录像能提供有用的信息。</div>
+            </div>
+            <span class="risk-badge risk-medium">medium</span>
+        </div>
+        
+        <div class="choice-item">
+            <div class="choice-number">6</div>
+            <div class="choice-text">
+                <div class="choice-label">回到你的住所，整理调查资料。</div>
+                <div class="choice-hint">重新审视已有的线索，也许会有新的发现。</div>
+            </div>
+            <span class="risk-badge risk-low">low</span>
+        </div>
+        
+                    </div>
+                </div>
+                
+                
+                <div class="events-section">
+                    <div class="section-title">事件</div>
+                    <div><span class="event-tag"><span class="event-icon" style="background: #6366f1"></span>info</span></div>
+                </div>
+                
+            </div>
+        </div>
+    
+        <div class="round-card" id="round-2">
+            <div class="round-header">
+                <div class="round-number">2</div>
+                <div class="round-input">
+                    <div class="round-input-label">玩家行动</div>
+                    <div class="round-input-value">观察酒吧里的可疑人物</div>
+                </div>
+            </div>
+            <div class="round-body">
+                <div class="narrative">## Overview
+
+This document provides an overview of the current state of the system, including key metrics, recent changes, and outstanding issues.  The goal is to provide a single source of truth for all stakeholders.
+
+### Key Metrics
+
+*   **Uptime:** 99.99% (last 30 days)
+*   **Response Time:** Average 23ms
+*   **Error Rate:** 0.1% (last 30 days)
+
+### Recent Changes
+
+*   **Deployment of Version 2.5:** Completed on 2023-10-27
+*   **Database Schema Update:**  Implemented on 2023-10-26
+
+### Outstanding Issues
+
+*   **Bug #123:**  User reported intermittent login failures.
+*   **Feature Request #456:**  Request for improved search functionality.
+</div>
+                
+                <div class="choices-section">
+                    <div class="section-title">可选行动</div>
+                    <div class="choices-list">
+                        
+        <div class="choice-item">
+            <div class="choice-number">1</div>
+            <div class="choice-text">
+                <div class="choice-label">Approve the changes</div>
+                <div class="choice-hint">This is the recommended course of action.</div>
+            </div>
+            <span class="risk-badge risk-low">low</span>
+        </div>
+        
+        <div class="choice-item">
+            <div class="choice-number">2</div>
+            <div class="choice-text">
+                <div class="choice-label">Reject the changes</div>
+                <div class="choice-hint">Further investigation is required.</div>
+            </div>
+            <span class="risk-badge risk-high">high</span>
+        </div>
+        
+        <div class="choice-item">
+            <div class="choice-number">3</div>
+            <div class="choice-text">
+                <div class="choice-label">Hold for review</div>
+                <div class="choice-hint">Await feedback from the development team.</div>
+            </div>
+            <span class="risk-badge risk-medium">medium</span>
+        </div>
+        
+                    </div>
+                </div>
+                
+                
+                <div class="events-section">
+                    <div class="section-title">事件</div>
+                    <div><span class="event-tag"><span class="event-icon" style="background: #f59e0b"></span>deployment</span><span class="event-tag"><span class="event-icon" style="background: #f59e0b"></span>alert</span></div>
+                </div>
+                
+            </div>
+        </div>
+    
+        <div class="round-card" id="round-3">
+            <div class="round-header">
+                <div class="round-number">3</div>
+                <div class="round-input">
+                    <div class="round-input-label">玩家行动</div>
+                    <div class="round-input-value">和黎安深入交谈</div>
+                </div>
+            </div>
+            <div class="round-body">
+                <div class="narrative">你走到黎安的桌子旁，他正低头看着手中的文件。空气中弥漫着劣质啤酒的刺鼻气味。你忍不住问道：‘黎安，你最近有什么发现吗？关于停电的事情……’
+
+黎安抬起头，眼神复杂地看着你，似乎在犹豫要不要说。他支支吾吾地说：‘我……我发现了一些奇怪的记录。旧电厂巡检表的复印件上，有一段时间被涂抹了，而且涂抹的痕迹很深。’
+
+他顿了顿，补充道：‘我怀疑停电可能和电厂有关，但又不敢轻易说出来。’
+
+你的嫌疑对‘电厂’线程的压力增加了。</div>
+                
+                <div class="choices-section">
+                    <div class="section-title">可选行动</div>
+                    <div class="choices-list">
+                        
+        <div class="choice-item">
+            <div class="choice-number">1</div>
+            <div class="choice-text">
+                <div class="choice-label">质问黎安关于涂抹记录的细节。</div>
+                <div class="choice-hint">深入了解涂抹的记录，试图找到更多线索。</div>
+            </div>
+            <span class="risk-badge risk-low">low</span>
+        </div>
+        
+        <div class="choice-item">
+            <div class="choice-number">2</div>
+            <div class="choice-text">
+                <div class="choice-label">询问黎安他为什么会得到这些巡检表。</div>
+                <div class="choice-hint">了解黎安获取巡检表的途径，可能存在隐藏的关联。</div>
+            </div>
+            <span class="risk-badge risk-medium">medium</span>
+        </div>
+        
+        <div class="choice-item">
+            <div class="choice-number">3</div>
+            <div class="choice-text">
+                <div class="choice-label">离开黎安的桌子，继续观察酒吧里的其他顾客。</div>
+                <div class="choice-hint">转移注意力，寻找其他可疑人物。</div>
+            </div>
+            <span class="risk-badge risk-low">low</span>
+        </div>
+        
+                    </div>
+                </div>
+                
+                
+                <div class="events-section">
+                    <div class="section-title">事件</div>
+                    <div><span class="event-tag"><span class="event-icon" style="background: #f59e0b"></span>dialogue</span><span class="event-tag"><span class="event-icon" style="background: #10b981"></span>discovery</span></div>
+                </div>
+                
+            </div>
+        </div>
+    
+        <div class="round-card" id="round-4">
+            <div class="round-header">
+                <div class="round-number">4</div>
+                <div class="round-input">
+                    <div class="round-input-label">玩家行动</div>
+                    <div class="round-input-value">去旧电厂调查</div>
+                </div>
+            </div>
+            <div class="round-body">
+                <div class="narrative">你决定离开鸦巢酒吧，前往旧电厂进行调查。你相信黎安提供的信息可能指向关键线索。
+
+你驾驶着汽车，沿着蜿蜒的道路向旧电厂驶去。天空阴沉沉的，仿佛预示着不祥的事情。你注意到，在前往电厂的路上，有一辆黑色的轿车正在紧跟你的车队。这让你感到有些不安。
+
+你走到旧电厂的入口，发现大门紧闭，周围一片荒凉。你尝试寻找进入电厂的方法，但发现所有入口都锁着。你的嫌疑对‘电厂’线程的压力增加了。
+
+你发现一个破旧的通风口，似乎可以进入电厂内部。你决定尝试通过通风口进入。
+
+你的生命 (hp): 80
+你的精力 (energy): 65
+你的硬币 (gold): 12
+你的时间 (time): {'day': 1, 'hour': 22, 'minute': 35}
+你的嫌疑 (suspicion): 25
+你的压力 (pressure): 40
+你的线索 (clues): 2
+你的真相拼图 (truth_map): ['黎安提供了旧电厂巡检表的复印件。', '旧电厂巡检表上的记录被涂抹了。']
+你的待追线索 (leads): ['确认停电前后进出旧电厂的人', '找出谁在买消息', '查清灯塔值班日志缺失的原因', '核对备电清单缺失的一页', '核对巡检表上的签名是否伪造']
+你的所在地点 (location): 旧电厂
+你的关系 (relationships): {'lian': 35, 'mayor': -10, 'dockmaster': 5, 'editor': 10, 'chief': 0}
+你的调查线 (threads): {'blackout': 1, 'city_hall': 1, 'union': 0, 'smuggling': 0}
+</div>
+                
+                <div class="choices-section">
+                    <div class="section-title">可选行动</div>
+                    <div class="choices-list">
+                        
+        <div class="choice-item">
+            <div class="choice-number">1</div>
+            <div class="choice-text">
+                <div class="choice-label">尝试撬开通风口的锁</div>
+                <div class="choice-hint">你试图用一把多功能工具撬开通风口的锁，但锁非常坚固，需要更多的时间和精力。</div>
+            </div>
+            <span class="risk-badge risk-low">low</span>
+        </div>
+        
+        <div class="choice-item">
+            <div class="choice-number">2</div>
+            <div class="choice-text">
+                <div class="choice-label">搜索通风口周围是否有其他入口或线索</div>
+                <div class="choice-hint">你仔细检查通风口周围的环境，希望能找到其他进入电厂的途径，或者一些可以提供线索的东西。</div>
+            </div>
+            <span class="risk-badge risk-low">low</span>
+        </div>
+        
+        <div class="choice-item">
+            <div class="choice-number">3</div>
+            <div class="choice-text">
+                <div class="choice-label">返回鸦巢酒吧，寻求帮助</div>
+                <div class="choice-hint">你意识到自己可能需要帮助，决定返回鸦巢酒吧，向酒保或其他人寻求支持。</div>
+            </div>
+            <span class="risk-badge risk-medium">medium</span>
+        </div>
+        
+                    </div>
+                </div>
+                
+                
+                <div class="events-section">
+                    <div class="section-title">事件</div>
+                    <div><span class="event-tag"><span class="event-icon" style="background: #f59e0b"></span>location_change</span><span class="event-tag"><span class="event-icon" style="background: #f59e0b"></span>observation</span></div>
+                </div>
+                
+            </div>
+        </div>
+    
+        <div class="round-card" id="round-5">
+            <div class="round-header">
+                <div class="round-number">5</div>
+                <div class="round-input">
+                    <div class="round-input-label">玩家行动</div>
+                    <div class="round-input-value">检查维修通道入口</div>
+                </div>
+            </div>
+            <div class="round-body">
+                <div class="narrative">你仔细检查了通风口的周围，发现一个隐蔽的维修通道入口，入口处有一块松动的砖头。你用手轻轻一拨，砖头便掉落下来，露出了一个狭窄的通道。
+
+你小心翼翼地进入通道，通道内漆黑一片，空气潮湿而寒冷。你点燃了打火机，照亮了通道。通道蜿蜒曲折，似乎通向电厂的地下设施。</div>
+                
+                <div class="choices-section">
+                    <div class="section-title">可选行动</div>
+                    <div class="choices-list">
+                        
+        <div class="choice-item">
+            <div class="choice-number">1</div>
+            <div class="choice-text">
+                <div class="choice-label">沿着通道继续前进</div>
+                <div class="choice-hint">深入调查</div>
+            </div>
+            <span class="risk-badge risk-medium">medium</span>
+        </div>
+        
+        <div class="choice-item">
+            <div class="choice-number">2</div>
+            <div class="choice-text">
+                <div class="choice-label">搜索通道入口的周围</div>
+                <div class="choice-hint">寻找线索</div>
+            </div>
+            <span class="risk-badge risk-low">low</span>
+        </div>
+        
+        <div class="choice-item">
+            <div class="choice-number">3</div>
+            <div class="choice-text">
+                <div class="choice-label">返回鸦巢酒吧</div>
+                <div class="choice-hint">寻求帮助</div>
+            </div>
+            <span class="risk-badge risk-low">low</span>
+        </div>
+        
+                    </div>
+                </div>
+                
+                
+                <div class="events-section">
+                    <div class="section-title">事件</div>
+                    <div><span class="event-tag"><span class="event-icon" style="background: #10b981"></span>discovery</span></div>
+                </div>
+                
+            </div>
+        </div>
+    
+        <div class="round-card" id="round-6">
+            <div class="round-header">
+                <div class="round-number">6</div>
+                <div class="round-input">
+                    <div class="round-input-label">玩家行动</div>
+                    <div class="round-input-value">寻找更多线索</div>
+                </div>
+            </div>
+            <div class="round-body">
+                <div class="narrative">你小心翼翼地沿着通道继续前进，通道内漆黑一片，空气潮湿而寒冷。你点燃了打火机，照亮了通道。通道蜿蜒曲折，似乎通向电厂的地下设施。你注意到通道墙壁上有一些奇怪的符号，像是某种古老的标记。你尝试用手机拍照记录下来，但信号很弱，无法清晰拍摄。你继续前进，发现通道前方有一个岔路口。一个岔路口有两个方向，一个通向更深的地方，另一个则通向一个相对较小的房间。</div>
+                
+                <div class="choices-section">
+                    <div class="section-title">可选行动</div>
+                    <div class="choices-list">
+                        
+        <div class="choice-item">
+            <div class="choice-number">1</div>
+            <div class="choice-text">
+                <div class="choice-label">沿着通道继续前进</div>
+                <div class="choice-hint">继续探索通道的深处，或许能找到更多线索。</div>
+            </div>
+            <span class="risk-badge risk-low">low</span>
+        </div>
+        
+        <div class="choice-item">
+            <div class="choice-number">2</div>
+            <div class="choice-text">
+                <div class="choice-label">搜索通道入口的周围</div>
+                <div class="choice-hint">也许通道入口附近隐藏着一些重要的信息。</div>
+            </div>
+            <span class="risk-badge risk-low">low</span>
+        </div>
+        
+        <div class="choice-item">
+            <div class="choice-number">3</div>
+            <div class="choice-text">
+                <div class="choice-label">返回鸦巢酒吧</div>
+                <div class="choice-hint">回到酒吧，寻求更多信息或休息。</div>
+            </div>
+            <span class="risk-badge risk-medium">medium</span>
+        </div>
+        
+                    </div>
+                </div>
+                
+                
+                <div class="events-section">
+                    <div class="section-title">事件</div>
+                    <div><span class="event-tag"><span class="event-icon" style="background: #10b981"></span>discovery</span></div>
+                </div>
+                
+            </div>
+        </div>
+    
+        <div class="round-card" id="round-7">
+            <div class="round-header">
+                <div class="round-number">7</div>
+                <div class="round-input">
+                    <div class="round-input-label">玩家行动</div>
+                    <div class="round-input-value">沿着通道继续前进</div>
+                </div>
+            </div>
+            <div class="round-body">
+                <div class="narrative">你小心翼翼地沿着通道继续前进，通道内漆黑一片，空气潮湿而寒冷。你点燃了打火机，照亮了通道。通道蜿蜒曲折，似乎通向电厂的地下设施。你注意到通道墙壁上有一些奇怪的符号，像是某种古老的标记。你尝试用手机拍照记录下来，但信号很弱，无法清晰拍摄。你继续前进，发现通道前方有一个岔路口。一个岔路口有两个方向，一个通向更深的地方，另一个则通向一个相对较小的房间。</div>
+                
+                <div class="choices-section">
+                    <div class="section-title">可选行动</div>
+                    <div class="choices-list">
+                        
+        <div class="choice-item">
+            <div class="choice-number">1</div>
+            <div class="choice-text">
+                <div class="choice-label">沿着通道继续前进</div>
+                <div class="choice-hint">继续探索通道深处，寻找更多线索。</div>
+            </div>
+            <span class="risk-badge risk-medium">medium</span>
+        </div>
+        
+        <div class="choice-item">
+            <div class="choice-number">2</div>
+            <div class="choice-text">
+                <div class="choice-label">搜索通道入口的周围</div>
+                <div class="choice-hint">仔细检查通道入口的周围环境，看看是否有遗漏的线索。</div>
+            </div>
+            <span class="risk-badge risk-low">low</span>
+        </div>
+        
+        <div class="choice-item">
+            <div class="choice-number">3</div>
+            <div class="choice-text">
+                <div class="choice-label">返回鸦巢酒吧</div>
+                <div class="choice-hint">回到鸦巢酒吧，与其他人交流，寻求帮助。</div>
+            </div>
+            <span class="risk-badge risk-low">low</span>
+        </div>
+        
+                    </div>
+                </div>
+                
+                
+                <div class="events-section">
+                    <div class="section-title">事件</div>
+                    <div><span class="event-tag"><span class="event-icon" style="background: #10b981"></span>discovery</span></div>
+                </div>
+                
+            </div>
+        </div>
+    
+        <div class="round-card" id="round-8">
+            <div class="round-header">
+                <div class="round-number">8</div>
+                <div class="round-input">
+                    <div class="round-input-label">玩家行动</div>
+                    <div class="round-input-value">前往钟楼街</div>
+                </div>
+            </div>
+            <div class="round-body">
+                <div class="narrative">你沿着通道继续深入，通道越来越狭窄，墙壁上的古老符号也变得更加清晰。你注意到，这些符号似乎与旧电厂的建设历史有关。突然，通道尽头传来一阵低沉的轰鸣声，伴随着一阵强烈的震动。你意识到，通道可能正在坍塌！你迅速向后退去，但通道已经开始坍塌，一块巨大的石块砸了下来，险些砸到你。幸好你及时躲闪，但你的生命值受到了损伤。</div>
+                
+                <div class="choices-section">
+                    <div class="section-title">可选行动</div>
+                    <div class="choices-list">
+                        
+        <div class="choice-item">
+            <div class="choice-number">1</div>
+            <div class="choice-text">
+                <div class="choice-label">尝试阻止通道坍塌</div>
+                <div class="choice-hint">看看能否找到阻止坍塌的方法，也许能找到更多线索。 难度较高，可能消耗大量精力。</div>
+            </div>
+            <span class="risk-badge risk-medium">medium</span>
+        </div>
+        
+        <div class="choice-item">
+            <div class="choice-number">2</div>
+            <div class="choice-text">
+                <div class="choice-label">逃离通道</div>
+                <div class="choice-hint">尽快离开通道，避免被埋在坍塌的废墟中。</div>
+            </div>
+            <span class="risk-badge risk-low">low</span>
+        </div>
+        
+        <div class="choice-item">
+            <div class="choice-number">3</div>
+            <div class="choice-text">
+                <div class="choice-label">仔细观察坍塌的痕迹</div>
+                <div class="choice-hint">仔细观察坍塌的痕迹，也许能找到导致通道坍塌的原因，或者发现隐藏的线索。</div>
+            </div>
+            <span class="risk-badge risk-low">low</span>
+        </div>
+        
+                    </div>
+                </div>
+                
+                
+                <div class="events-section">
+                    <div class="section-title">事件</div>
+                    <div><span class="event-tag"><span class="event-icon" style="background: #f59e0b"></span>environmental</span><span class="event-tag"><span class="event-icon" style="background: #f59e0b"></span>narrative</span></div>
+                </div>
+                
+            </div>
+        </div>
+    
+        <div class="round-card" id="round-9">
+            <div class="round-header">
+                <div class="round-number">9</div>
+                <div class="round-input">
+                    <div class="round-input-label">玩家行动</div>
+                    <div class="round-input-value">打听停电消息</div>
+                </div>
+            </div>
+            <div class="round-body">
+                <div class="narrative">你被困在坍塌的通道中，耳边充斥着石块坠落的轰鸣声。空气中弥漫着尘土和潮湿的气味，你感到一阵眩晕。
+
+你试图通过通道的另一端寻找出口，但通道已经变得越来越狭窄，几乎无法通行。你听到一个熟悉的声音在耳边响起：‘黎安！你在哪里？’
+
+你意识到黎安可能也发现了什么，并且正在寻找你。 你尝试呼叫黎安，但你的声音被轰鸣声淹没。 你感到越来越绝望，同时，你的生命值正在迅速下降。</div>
+                
+                <div class="choices-section">
+                    <div class="section-title">可选行动</div>
+                    <div class="choices-list">
+                        
+        <div class="choice-item">
+            <div class="choice-number">1</div>
+            <div class="choice-text">
+                <div class="choice-label">尝试用自己的力量阻止通道坍塌</div>
+                <div class="choice-hint">你相信自己能够用尽全力阻止坍塌，但这可能是一场徒劳的努力。风险极高，但如果成功，或许能找到通往出口的道路。 成功率低，生命值损失大。</div>
+            </div>
+            <span class="risk-badge risk-high">high</span>
+        </div>
+        
+        <div class="choice-item">
+            <div class="choice-number">2</div>
+            <div class="choice-text">
+                <div class="choice-label">继续寻找出口</div>
+                <div class="choice-hint">你选择保持冷静，继续搜索通道的出口。虽然通道越来越狭窄，但你相信，只要坚持下去，总能找到逃生的机会。 风险较低，但可能浪费更多时间。</div>
+            </div>
+            <span class="risk-badge risk-medium">medium</span>
+        </div>
+        
+        <div class="choice-item">
+            <div class="choice-number">3</div>
+            <div class="choice-text">
+                <div class="choice-label">呼喊黎安</div>
+                <div class="choice-hint">你竭尽全力呼喊黎安的名字，希望他能听到你的声音并提供帮助。 你的声音在狭窄的通道中回荡，但能否被黎安听到尚不确定。 风险低，但效果不确定。</div>
+            </div>
+            <span class="risk-badge risk-low">low</span>
+        </div>
+        
+                    </div>
+                </div>
+                
+                
+                <div class="events-section">
+                    <div class="section-title">事件</div>
+                    <div><span class="event-tag"><span class="event-icon" style="background: #f59e0b"></span>environmental</span><span class="event-tag"><span class="event-icon" style="background: #f59e0b"></span>character</span></div>
+                </div>
+                
+            </div>
+        </div>
+    
+        <div class="round-card" id="round-10">
+            <div class="round-header">
+                <div class="round-number">10</div>
+                <div class="round-input">
+                    <div class="round-input-label">玩家行动</div>
+                    <div class="round-input-value">继续寻找出口</div>
+                </div>
+            </div>
+            <div class="round-body">
+                <div class="narrative">你挣扎着在坍塌的通道中寻找出口，石块不断坠落，尘土飞扬。你感到身体剧烈震动，仿佛随时都会被石块砸死。你努力避开倒塌的瓦砾，但通道越来越狭窄，几乎无法通行。突然，你看到前方出现了一丝光亮，你拼命朝光亮奔去，最终，你成功地突破了坍塌的通道，来到了一个巨大的地下空间。这个地下空间曾经是旧电厂的地下设施，现在已经荒废多年，到处都是锈迹斑斑的机器和散落的零件。你发现自己身处一个巨大的发电室，房间中央矗立着一台巨大的发电机，发电机已经停止运转，但仍然散发着一丝微弱的光芒。在发电机的周围，你发现了一些奇怪的痕迹，似乎有人在这里进行过某种实验。</div>
+                
+                <div class="choices-section">
+                    <div class="section-title">可选行动</div>
+                    <div class="choices-list">
+                        
+        <div class="choice-item">
+            <div class="choice-number">1</div>
+            <div class="choice-text">
+                <div class="choice-label">仔细检查发电机</div>
+                <div class="choice-hint">也许发电机上留下了关键的线索。</div>
+            </div>
+            <span class="risk-badge risk-medium">medium</span>
+        </div>
+        
+        <div class="choice-item">
+            <div class="choice-number">2</div>
+            <div class="choice-text">
+                <div class="choice-label">搜索发电室</div>
+                <div class="choice-hint">也许在发电室的角落里能找到什么有用的东西。</div>
+            </div>
+            <span class="risk-badge risk-low">low</span>
+        </div>
+        
+        <div class="choice-item">
+            <div class="choice-number">3</div>
+            <div class="choice-text">
+                <div class="choice-label">尝试修复发电机</div>
+                <div class="choice-hint">也许发电机还能启动。</div>
+            </div>
+            <span class="risk-badge risk-high">high</span>
+        </div>
+        
+                    </div>
+                </div>
+                
+                
+                <div class="events-section">
+                    <div class="section-title">事件</div>
+                    <div><span class="event-tag"><span class="event-icon" style="background: #f59e0b"></span>environmental</span><span class="event-tag"><span class="event-icon" style="background: #10b981"></span>discovery</span></div>
+                </div>
+                
+            </div>
+        </div>
+    
+        <div class="round-card" id="round-11">
+            <div class="round-header">
+                <div class="round-number">11</div>
+                <div class="round-input">
+                    <div class="round-input-label">玩家行动</div>
+                    <div class="round-input-value">返回鸦巢酒吧</div>
+                </div>
+            </div>
+            <div class="round-body">
+                <div class="narrative">你挣扎着在坍塌的通道中寻找出口，石块不断坠落，尘土飞扬。你感到身体剧烈震动，仿佛随时都会被石块砸死。你努力避开倒塌的瓦砾，但通道越来越狭窄，几乎无法通行。突然，你看到前方出现了一丝光亮，你拼命朝光亮奔去，最终，你成功地突破了坍塌的通道，来到了一个巨大的地下空间。这个地下空间曾经是旧电厂的地下设施，现在已经荒废多年，到处都是锈迹斑斑的机器和散落的零件。你发现自己身处一个巨大的发电室，房间中央矗立着一台巨大的发电机，发电机已经停止运转，但仍然散发着一丝微弱的光芒。在发电机的周围，你发现了一些奇怪的痕迹，似乎有人在这里进行过某种实验。
+
+你站在巨大的发电室里，感受着周围的阴冷和潮湿。发电机锈迹斑斑，但仍然散发着微弱的光芒，仿佛在诉说着过去的故事。你回想起之前被困在通道里的经历，心中充满了恐惧和不安。你决定先观察一下周围的环境，看看能不能找到一些线索。</div>
+                
+                <div class="choices-section">
+                    <div class="section-title">可选行动</div>
+                    <div class="choices-list">
+                        
+        <div class="choice-item">
+            <div class="choice-number">1</div>
+            <div class="choice-text">
+                <div class="choice-label">仔细检查发电机</div>
+                <div class="choice-hint">你决定先观察一下周围的环境，看看能不能找到一些线索。</div>
+            </div>
+            <span class="risk-badge risk-medium">medium</span>
+        </div>
+        
+        <div class="choice-item">
+            <div class="choice-number">2</div>
+            <div class="choice-text">
+                <div class="choice-label">搜索发电室</div>
+                <div class="choice-hint">你决定仔细搜索发电室的每一个角落，看看有没有什么异常。</div>
+            </div>
+            <span class="risk-badge risk-low">low</span>
+        </div>
+        
+        <div class="choice-item">
+            <div class="choice-number">3</div>
+            <div class="choice-text">
+                <div class="choice-label">尝试修复发电机</div>
+                <div class="choice-hint">你决定尝试修复发电机，看看能不能让它重新启动。</div>
+            </div>
+            <span class="risk-badge risk-high">high</span>
+        </div>
+        
+                    </div>
+                </div>
+                
+                
+                <div class="events-section">
+                    <div class="section-title">事件</div>
+                    <div><span class="event-tag"><span class="event-icon" style="background: #f59e0b"></span>location_change</span></div>
+                </div>
+                
+            </div>
+        </div>
+    
+        <div class="round-card" id="round-12">
+            <div class="round-header">
+                <div class="round-number">12</div>
+                <div class="round-input">
+                    <div class="round-input-label">玩家行动</div>
+                    <div class="round-input-value">找黎安询问更多情报</div>
+                </div>
+            </div>
+            <div class="round-body">
+                <div class="narrative">你深吸一口气，努力压下心中的恐惧，决定先尝试找到黎安。你沿着发电室的通道，小心翼翼地走着，试图找到黎安的声音。
+
+突然，你听到一阵急促的脚步声，在黑暗中传来。你循着声音走去，发现黎安正站在发电室的另一端，他脸色苍白，神情焦急。’我一直在这里！’ 黎安的声音有些颤抖，’我发现了一些奇怪的东西，你必须看看！’ 
+
+黎安指着发电机的控制面板，那里有一些奇怪的符号，这些符号与你之前在通道上看到的古老标记非常相似。’这些符号似乎是一种能量控制系统，而且，这里似乎曾经发生过某种实验！’ 黎安补充道，’我怀疑这与停电有关！’
+
+你仔细观察控制面板，发现其中一些按钮已经被损坏，但仍然可以感受到一丝微弱的能量波动。你意识到，这可能就是导致旧电厂停电的关键。</div>
+                
+                <div class="choices-section">
+                    <div class="section-title">可选行动</div>
+                    <div class="choices-list">
+                        
+        <div class="choice-item">
+            <div class="choice-number">1</div>
+            <div class="choice-text">
+                <div class="choice-label">尝试修复发电机控制面板</div>
+                <div class="choice-hint">也许修复控制面板能恢复发电机，同时也能揭示更多信息。</div>
+            </div>
+            <span class="risk-badge risk-medium">medium</span>
+        </div>
+        
+        <div class="choice-item">
+            <div class="choice-number">2</div>
+            <div class="choice-text">
+                <div class="choice-label">询问黎安关于符号的更多信息</div>
+                <div class="choice-hint">深入了解这些符号的含义，或许能找到解决问题的关键。</div>
+            </div>
+            <span class="risk-badge risk-low">low</span>
+        </div>
+        
+        <div class="choice-item">
+            <div class="choice-number">3</div>
+            <div class="choice-text">
+                <div class="choice-label">搜索发电室周围的痕迹</div>
+                <div class="choice-hint">也许在发电室周围能找到更多实验的证据。</div>
+            </div>
+            <span class="risk-badge risk-medium">medium</span>
+        </div>
+        
+                    </div>
+                </div>
+                
+                
+                <div class="events-section">
+                    <div class="section-title">事件</div>
+                    <div><span class="event-tag"><span class="event-icon" style="background: #f59e0b"></span>encounter</span><span class="event-tag"><span class="event-icon" style="background: #10b981"></span>discovery</span></div>
+                </div>
+                
+            </div>
+        </div>
+    
+    </div>
+    
+    <footer style="text-align: center; padding: 2rem; color: var(--text-secondary); border-top: 1px solid var(--border); margin-top: 2rem;">
+        <p>Generated by CBSE (CardBar Story Engine)</p>
+        <p style="font-size: 0.85rem; margin-top: 0.5rem;">LLM Provider: Ollama | Model: gemma3:4b</p>
+    </footer>
+    
+    <script>
+        // Progress bar on scroll
+        window.addEventListener('scroll', () => {
+            const winScroll = document.body.scrollTop || document.documentElement.scrollTop;
+            const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+            const scrolled = (winScroll / height) * 100;
+            document.getElementById('progressBar').style.width = scrolled + '%';
+        });
+        
+        // Animate cards on scroll
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        });
+        
+        document.querySelectorAll('.round-card').forEach(card => {
+            card.style.opacity = '0';
+            card.style.transform = 'translateY(20px)';
+            card.style.transition = 'opacity 0.5s, transform 0.5s';
+            observer.observe(card);
+        });
+    </script>
+</body>
+</html>
