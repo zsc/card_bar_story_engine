@@ -1,0 +1,210 @@
+game_id: mist_harbor
+title: "雾港回声"
+version: "1.0.0"
+language: "zh-CN"
+tone: "noir_mystery"
+content_rating: "PG-13"
+
+llm:
+  recommended_model: "gpt-4.1-mini-or-gemini-1.5"
+  temperature: 0.8
+  max_output_tokens: 900
+
+status_bar:
+  items:
+    - var_id: hp
+      label: "生命"
+      style: meter
+      show_delta: true
+      critical_threshold: 25
+    - var_id: energy
+      label: "精力"
+      style: meter
+      show_delta: true
+      critical_threshold: 20
+    - var_id: gold
+      label: "币"
+      style: text
+      show_delta: true
+      critical_threshold: 0
+    - var_id: time
+      label: "时间"
+      style: text
+      show_delta: false
+
+variables:
+  - id: hp
+    label: "生命"
+    type: integer
+    min: 0
+    max: 100
+    default: 80
+    card: { visible: false, order: 0, format: plain, description: "你还能撑多久。", prompt_weight: high }
+    rules: { clamp: true, readonly: false, update_policy: any }
+    tags: ["resource"]
+
+  - id: energy
+    label: "精力"
+    type: integer
+    min: 0
+    max: 100
+    default: 70
+    card: { visible: false, order: 0, format: plain, description: "行动效率与判断力的底盘。", prompt_weight: high }
+    rules: { clamp: true, readonly: false, update_policy: any }
+    tags: ["resource"]
+
+  - id: gold
+    label: "硬币"
+    type: integer
+    min: 0
+    max: 999
+    default: 12
+    card: { visible: false, order: 0, format: plain, description: "买消息、坐车、塞封口费。", prompt_weight: medium }
+    rules: { clamp: true, readonly: false, update_policy: any }
+    tags: ["resource"]
+
+  - id: time
+    label: "时间"
+    type: object
+    default:
+      day: 1
+      hour: 20
+      minute: 10
+    card:
+      visible: true
+      order: 10
+      format: keyvalue
+      description: "雾港的夜会把所有人吞掉。午夜前必须做出结论。"
+      prompt_weight: high
+    rules: { clamp: false, readonly: false, update_policy: any }
+    tags: ["resource"]
+
+  - id: suspicion
+    label: "嫌疑"
+    type: integer
+    min: 0
+    max: 100
+    default: 10
+    card:
+      visible: true
+      order: 20
+      format: bar
+      description: "你被盯上的程度。越高越危险。"
+      prompt_weight: high
+    rules: { clamp: true, readonly: false, update_policy: any }
+    tags: ["risk"]
+
+  - id: clues
+    label: "线索"
+    type: integer
+    min: 0
+    max: 12
+    default: 0
+    card:
+      visible: true
+      order: 30
+      format: bar
+      description: "你已拼到的关键拼图数量。"
+      prompt_weight: high
+    rules: { clamp: true, readonly: false, update_policy: any }
+    tags: ["progress"]
+
+  - id: truth_map
+    label: "真相拼图"
+    type: list
+    default: []
+    card:
+      visible: true
+      order: 40
+      format: list
+      description: "用一句话记录确认过的事实。"
+      prompt_weight: medium
+    rules: { clamp: false, readonly: false, update_policy: any }
+    tags: ["knowledge"]
+
+  - id: location
+    label: "所在地点"
+    type: enum
+    enum_values: ["码头", "灯塔", "旧电厂", "钟楼街", "鸦巢酒吧", "报社"]
+    default: "鸦巢酒吧"
+    card:
+      visible: true
+      order: 50
+      format: plain
+      description: "你当前所处的位置。"
+      prompt_weight: high
+    rules: { clamp: false, readonly: false, update_policy: set_only }
+    tags: ["world"]
+
+  - id: relationships
+    label: "关系"
+    type: object
+    default:
+      lian: 35
+      mayor: -10
+      dockmaster: 5
+    card:
+      visible: true
+      order: 60
+      format: keyvalue
+      description: "人脉会决定你拿到真相还是被沉海。范围 -100..100。"
+      prompt_weight: medium
+    rules: { clamp: false, readonly: false, update_policy: any }
+    tags: ["relationship"]
+
+  - id: inventory
+    label: "随身物品"
+    type: list
+    default: ["旧怀表", "纸烟", "折叠小刀"]
+    card:
+      visible: true
+      order: 70
+      format: list
+      description: "能用就用，别逞强。"
+      prompt_weight: low
+    rules: { clamp: false, readonly: false, update_policy: any }
+    tags: ["items"]
+
+  - id: flags
+    label: "旗标"
+    type: object
+    default:
+      met_lian: false
+      power_sabotage_confirmed: false
+      chased: false
+    card:
+      visible: true
+      order: 80
+      format: keyvalue
+      description: "引擎内部的剧情开关。"
+      prompt_weight: low
+    rules: { clamp: false, readonly: false, update_policy: any }
+    tags: ["flag"]
+
+initial_state:
+  hp: 80
+  energy: 70
+  gold: 12
+  time: { day: 1, hour: 20, minute: 10 }
+  suspicion: 10
+  clues: 0
+  truth_map: []
+  location: "鸦巢酒吧"
+  relationships: { lian: 35, mayor: -10, dockmaster: 5 }
+  inventory: ["旧怀表", "纸烟", "折叠小刀"]
+  flags: { met_lian: false, power_sabotage_confirmed: false, chased: false }
+
+win_conditions:
+  - "flags.power_sabotage_confirmed == true and clues >= 8"
+lose_conditions:
+  - "hp <= 0"
+  - "suspicion >= 100"
+  - "time.hour >= 24"
+
+prompt_rules:
+  style_notes:
+    - "新黑色：潮湿、霓虹、雾、短句、暗喻克制。"
+    - "推动调查：每回合推进一个线索/关系/风险。"
+  boundaries:
+    - "PG-13：不写露骨性内容，不描写血腥细节。"
+    - "不输出真实世界违法操作指南。"

@@ -1,0 +1,23 @@
+[project]
+name = "card-bar-story-engine"
+version = "0.1.0"
+description = "CardBar Story Engine (CBSE) MVP"
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "MIT" }
+authors = [{ name = "CBSE" }]
+
+dependencies = [
+  "textual>=0.56.0",
+  "pydantic>=2.5.0",
+  "PyYAML>=6.0.1",
+  "httpx>=0.25.0",
+  "rich>=13.0.0",
+]
+
+[project.scripts]
+cbse = "cbse.__main__:main"
+
+[tool.ruff]
+line-length = 100
+

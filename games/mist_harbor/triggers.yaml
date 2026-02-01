@@ -1,0 +1,43 @@
+triggers:
+  - id: chased_when_suspicion_high
+    priority: 10
+    once: false
+    when: "suspicion >= 80 and flags.chased == false"
+    effects:
+      - op: set
+        path: "flags.chased"
+        value: true
+        reason: "嫌疑过高，开始被尾随"
+      - op: dec
+        path: "energy"
+        value: 10
+        reason: "你不得不绕路甩尾巴"
+    events:
+      - type: "danger"
+        message: "你感觉有人在雾里跟着你。"
+
+  - id: game_over_midnight
+    priority: 1
+    once: false
+    when: "time.hour >= 24"
+    effects: []
+    events:
+      - type: "end"
+        message: "午夜钟声吞掉了整座城市的嗡鸣。"
+
+  - id: confirm_sabotage_when_enough_truth
+    priority: 20
+    once: true
+    when: "clues >= 8 and flags.power_sabotage_confirmed == false"
+    effects:
+      - op: set
+        path: "flags.power_sabotage_confirmed"
+        value: true
+        reason: "线索已足以确认：这是人为破坏"
+      - op: push
+        path: "truth_map"
+        value: "停电并非事故：有人针对旧电厂做了手脚。"
+        reason: "关键结论"
+    events:
+      - type: "breakthrough"
+        message: "你把碎片拼成一张能致命的图。"
