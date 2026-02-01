@@ -18,8 +18,15 @@ class PromptContext:
 
 
 class PromptBuilder:
-    def __init__(self, variables: dict[str, VariableDefinition]) -> None:
+    def __init__(
+        self,
+        variables: dict[str, VariableDefinition],
+        compact: bool = False,
+        world_max_chars: int | None = None,
+    ) -> None:
         self.variables = variables
+        self.compact = compact
+        self.world_max_chars = world_max_chars
 
     def build_messages(self, ctx: PromptContext) -> list[dict[str, str]]:
         system = self._system_message()
@@ -40,6 +47,11 @@ class PromptBuilder:
         )
 
     def _developer_message(self, ctx: PromptContext) -> str:
+        world = ctx.world_markdown
+        if self.compact:
+            world = self._compact_world(world)
+        if self.world_max_chars and len(world) > self.world_max_chars:
+            world = world[: self.world_max_chars].rstrip() + "\n\n[...truncated...]"
         rules = []
         if ctx.game.prompt_rules.style_notes:
             rules.extend(ctx.game.prompt_rules.style_notes)
@@ -53,7 +65,7 @@ class PromptBuilder:
         return (
             f"Game: {ctx.game.title} ({ctx.game.tone})\n"
             f"Content rating: {ctx.game.content_rating}\n"
-            f"World:\n{ctx.world_markdown}\n"
+            f"World:\n{world}\n"
             f"{rule_text}\n"
             "Output JSON schema (top-level):\n"
             "{\n"
@@ -71,6 +83,8 @@ class PromptBuilder:
         for var_id, var_def in self.variables.items():
             weight = var_def.card.prompt_weight
             if weight == "hidden":
+                continue
+            if self.compact and weight == "low":
                 continue
             if weight not in ("high", "medium", "low"):
                 continue
@@ -99,3 +113,43 @@ class PromptBuilder:
             f"Player input: {ctx.player_input}\n"
             "Respond with JSON only."
         )
+
+    def _compact_world(self, text: str) -> str:
+        if not text:
+            return ""
+        lines = text.splitlines()
+        sections: list[tuple[str, list[str]]] = []
+        current_title = ""
+        current_lines: list[str] = []
+        for line in lines:
+            if line.startswith("## "):
+                if current_lines:
+                    sections.append((current_title, current_lines))
+                current_title = line[3:].strip()
+                current_lines = [line]
+            else:
+                current_lines.append(line)
+        if current_lines:
+            sections.append((current_title, current_lines))
+
+        allow = {
+            "城市与地点",
+            "关键势力",
+            "重要人物（可分批出场）",
+            "重要人物",
+            "叙事原则（必须遵守）",
+            "叙事原则",
+            "结局走向（方向提示）",
+            "结局走向",
+        }
+        kept: list[str] = []
+        for title, sec_lines in sections:
+            if not title or title in allow:
+                kept.append("\n".join(sec_lines).strip())
+
+        # Fallback: if nothing matched, keep the first 1200 chars.
+        if not kept:
+            return text[:1200].rstrip() + "\n\n[...truncated...]"
+
+        compact = "\n\n".join(part for part in kept if part)
+        return compact.strip()

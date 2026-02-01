@@ -1,0 +1,338 @@
+game_id: polish_soldier
+title: "从维斯瓦河到鸭绿江"
+version: "1.0.0"
+language: "zh-CN"
+tone: "war_epic"
+content_rating: "PG-13"
+
+llm:
+  recommended_model: "gpt-4.1-mini-or-gemini-1.5"
+  temperature: 0.75
+  max_output_tokens: 1000
+
+status_bar:
+  items:
+    - var_id: hp
+      label: "生命"
+      style: meter
+      show_delta: true
+      critical_threshold: 25
+    - var_id: morale
+      label: "士气"
+      style: meter
+      show_delta: true
+      critical_threshold: 20
+    - var_id: experience
+      label: "经验"
+      style: meter
+      show_delta: true
+      critical_threshold: 0
+    - var_id: discipline
+      label: "纪律"
+      style: meter
+      show_delta: true
+      critical_threshold: 20
+    - var_id: comradeship
+      label: "战友情"
+      style: meter
+      show_delta: true
+      critical_threshold: 0
+    - var_id: trauma
+      label: "创伤"
+      style: meter
+      show_delta: true
+      critical_threshold: 80
+    - var_id: year
+      label: "年份"
+      style: text
+      show_delta: false
+      critical_threshold: 0
+
+variables:
+  - id: hp
+    label: "生命"
+    type: integer
+    min: 0
+    max: 100
+    default: 85
+    card: { visible: false, order: 0, format: plain, description: "你的身体状况，决定能否继续战斗。", prompt_weight: high }
+    rules: { clamp: true, readonly: false, update_policy: any }
+    tags: ["resource"]
+
+  - id: morale
+    label: "士气"
+    type: integer
+    min: 0
+    max: 100
+    default: 60
+    card: { visible: false, order: 0, format: plain, description: "战斗意志与信念的根基。", prompt_weight: high }
+    rules: { clamp: true, readonly: false, update_policy: any }
+    tags: ["resource"]
+
+  - id: experience
+    label: "战斗经验"
+    type: integer
+    min: 0
+    max: 100
+    default: 10
+    card:
+      visible: true
+      order: 10
+      format: bar
+      description: "从波兰平原到朝鲜山岭的战火淬炼。"
+      prompt_weight: high
+    rules: { clamp: true, readonly: false, update_policy: any }
+    tags: ["progress"]
+
+  - id: discipline
+    label: "纪律值"
+    type: integer
+    min: 0
+    max: 100
+    default: 40
+    card:
+      visible: true
+      order: 15
+      format: bar
+      description: "苏军体系对你的认可程度。"
+      prompt_weight: medium
+    rules: { clamp: true, readonly: false, update_policy: any }
+    tags: ["resource"]
+
+  - id: comradeship
+    label: "同袍情谊"
+    type: integer
+    min: 0
+    max: 100
+    default: 30
+    card:
+      visible: true
+      order: 20
+      format: bar
+      description: "战友之间的信任与羁绊。"
+      prompt_weight: high
+    rules: { clamp: true, readonly: false, update_policy: any }
+    tags: ["relationship"]
+
+  - id: trauma
+    label: "战争创伤"
+    type: integer
+    min: 0
+    max: 100
+    default: 15
+    card:
+      visible: true
+      order: 25
+      format: bar
+      description: "目睹的死亡与失去在心底沉淀。"
+      prompt_weight: medium
+    rules: { clamp: true, readonly: false, update_policy: any }
+    tags: ["risk"]
+
+  - id: identity
+    label: "身份认同"
+    type: integer
+    min: -100
+    max: 100
+    default: 0
+    card:
+      visible: true
+      order: 30
+      format: bar
+      description: "-100纯波兰认同，+100纯苏联认同。"
+      prompt_weight: high
+    rules: { clamp: true, readonly: false, update_policy: any }
+    tags: ["spirit"]
+
+  - id: year
+    label: "年份"
+    type: object
+    default:
+      year: 1939
+      month: 9
+      day: 1
+    card:
+      visible: true
+      order: 35
+      format: keyvalue
+      description: "战争将岁月切割成碎片。"
+      prompt_weight: high
+    rules: { clamp: false, readonly: false, update_policy: any }
+    tags: ["world"]
+
+  - id: location
+    label: "所在位置"
+    type: enum
+    enum_values: ["波兰", "苏联西部", "斯大林格勒", "莫斯科", "西伯利亚", "远东", "满洲", "朝鲜", "日本"]
+    default: "波兰"
+    card:
+      visible: true
+      order: 40
+      format: plain
+      description: "你脚下的土地时刻在变迁。"
+      prompt_weight: high
+    rules: { clamp: false, readonly: false, update_policy: set_only }
+    tags: ["world"]
+
+  - id: campaign_stage
+    label: "战役阶段"
+    type: enum
+    enum_values: ["波兰保卫战", "苏德战争初期", "斯大林格勒", "库尔斯克", "巴格拉季昂", "远东调防", "满洲战役", "解放朝鲜", "战后"]
+    default: "波兰保卫战"
+    card:
+      visible: true
+      order: 45
+      format: plain
+      description: "战争的不同篇章。"
+      prompt_weight: high
+    rules: { clamp: false, readonly: false, update_policy: set_only }
+    tags: ["world"]
+
+  - id: rank
+    label: "军衔"
+    type: enum
+    enum_values: ["平民", "列兵", "下士", "中士", "上士", "准尉", "少尉"]
+    default: "平民"
+    card:
+      visible: true
+      order: 50
+      format: plain
+      description: "肩章上的星与杠。"
+      prompt_weight: medium
+    rules: { clamp: false, readonly: false, update_policy: set_only }
+    tags: ["progress"]
+
+  - id: relationships
+    label: "人际关系"
+    type: object
+    default:
+      janek: 50
+      vasily: 20
+      kowalski_captain: 30
+      boris_political: -10
+      yuri_sergeant: 10
+      korean_guide: 0
+    card:
+      visible: true
+      order: 60
+      format: keyvalue
+      description: "战争中最珍贵也最脆弱的联系。范围 -100..100。"
+      prompt_weight: medium
+    rules: { clamp: false, readonly: false, update_policy: any }
+    tags: ["relationship"]
+
+  - id: truth_map
+    label: "记忆碎片"
+    type: list
+    default: []
+    card:
+      visible: true
+      order: 70
+      format: list
+      description: "那些无法忘却的画面与事实。"
+      prompt_weight: medium
+    rules: { clamp: false, readonly: false, update_policy: any }
+    tags: ["knowledge"]
+
+  - id: inventory
+    label: "随身物品"
+    type: list
+    default: ["家传怀表", "波兰军徽", "母亲的照片", "干粮袋"]
+    card:
+      visible: true
+      order: 80
+      format: list
+      description: "能陪你走过战火的物件。"
+      prompt_weight: low
+    rules: { clamp: false, readonly: false, update_policy: any }
+    tags: ["items"]
+
+  - id: decorations
+    label: "勋章"
+    type: list
+    default: []
+    card:
+      visible: true
+      order: 85
+      format: list
+      description: "钢铁与血换来的金属片。"
+      prompt_weight: low
+    rules: { clamp: false, readonly: false, update_policy: any }
+    tags: ["progress"]
+
+  - id: flags
+    label: "命运标记"
+    type: object
+    default:
+      joined_red_army: false
+      survived_stalingrad: false
+      transferred_to_far_east: false
+      entered_korea: false
+      met_korean_girl: false
+      saved_comrade: false
+      executed_order: false
+      questioned_war: false
+      wrote_letter_home: false
+      saw_warsaw_gone: false
+      learned_russian: false
+      has_polish_friends: true
+    card:
+      visible: true
+      order: 90
+      format: keyvalue
+      description: "人生转折的关键节点。"
+      prompt_weight: low
+    rules: { clamp: false, readonly: false, update_policy: any }
+    tags: ["flag"]
+
+initial_state:
+  hp: 85
+  morale: 60
+  experience: 10
+  discipline: 40
+  comradeship: 30
+  trauma: 15
+  identity: 0
+  year: { year: 1939, month: 9, day: 1 }
+  location: "波兰"
+  campaign_stage: "波兰保卫战"
+  rank: "平民"
+  relationships: { janek: 50, vasily: 20, kowalski_captain: 30, boris_political: -10, yuri_sergeant: 10, korean_guide: 0 }
+  truth_map: []
+  inventory: ["家传怀表", "波兰军徽", "母亲的照片", "干粮袋"]
+  decorations: []
+  flags:
+    joined_red_army: false
+    survived_stalingrad: false
+    transferred_to_far_east: false
+    entered_korea: false
+    met_korean_girl: false
+    saved_comrade: false
+    executed_order: false
+    questioned_war: false
+    wrote_letter_home: false
+    saw_warsaw_gone: false
+    learned_russian: false
+    has_polish_friends: true
+
+win_conditions:
+  - "flags.entered_korea == true and experience >= 70"
+  - "flags.saved_comrade == true and campaign_stage == '战后'"
+
+lose_conditions:
+  - "hp <= 0"
+  - "morale <= 0 and trauma >= 80"
+  - "year.year >= 1946 and campaign_stage == '波兰保卫战'"
+
+prompt_rules:
+  style_notes:
+    - "史诗风格：宏大历史背景下的个人命运，节制而克制的情感描写。"
+    - "历史准确性：1939-1945年 timeline，重要战役与历史事件需符合史实。"
+    - "身份张力：波兰人加入苏军的内心挣扎，对两个祖国的复杂情感。"
+    - "每回合推进：时间推进、地点转换、或人物关系变化。"
+    - "关键地点：波兰华沙/维斯瓦河、苏联各战场、远东、朝鲜平壤/汉城。"
+    - "关键人物：波兰同乡雅内克、苏军政委鲍里斯、朝鲜向导金英姬等。"
+  boundaries:
+    - "PG-13：不写露骨性内容，不美化战争暴力，不描写血腥细节。"
+    - "尊重历史：不歪曲二战历史事实，不宣扬极端民族主义。"
+    - "不能替玩家做决定，必须给出选择。"

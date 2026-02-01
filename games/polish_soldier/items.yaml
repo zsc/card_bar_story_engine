@@ -1,0 +1,108 @@
+items:
+  - id: pocket_watch
+    name: "家传怀表"
+    description: "你父亲的遗物，背面刻着'Czas leczy rany'（时间治愈伤痛）。"
+    use: "提醒你时间的流逝，也提醒你从何处来。"
+    tags: ["personal", "heirloom", "polish"]
+
+  - id: polish_insignia
+    name: "波兰军徽"
+    description: "1939年你佩戴的波兰军队徽章，现在藏在贴身口袋里。"
+    use: "身份的象征，私下看时提醒自己是波兰人。"
+    tags: ["personal", "identity", "secret"]
+
+  - id: mother_photo
+    name: "母亲的照片"
+    description: "黑白的，边缘已经磨损。你不知道她是否还活着。"
+    use: "在最低谷的时候给你力量，也是你最大的软肋。"
+    tags: ["personal", "family", "emotional"]
+
+  - id: food_pouch
+    name: "干粮袋"
+    description: "装着黑面包、腌猪油，偶尔有一点糖。"
+    use: "生存必需品，也可以用来交换情报或友谊。"
+    tags: ["survival", "resource"]
+
+  - id: mosin_nagant
+    name: "莫辛-纳甘步枪"
+    description: "苏军标配，比你用过的波兰步枪更粗糙但更可靠。"
+    use: "战斗，也是你在军队中的身份象征。"
+    tags: ["weapon", "military", "soviet"]
+
+  - id: medal_stalingrad
+    name: "斯大林格勒防御奖章"
+    description: "铜质的，颁发给所有参加过那场保卫战的人。"
+    use: "证明你是老兵，能在苏军中获得一定的尊重。"
+    tags: ["decoration", "soviet", "prestige"]
+
+  - id: medal_victory
+    name: "战胜德国奖章"
+    description: "1945年颁发给所有参战人员，背面刻着'1941-1945'。"
+    use: "标志着你在欧洲战场的结束，也是远东调防的凭证。"
+    tags: ["decoration", "soviet", "milestone"]
+
+  - id: unfinished_letter
+    name: "未完成的信"
+    description: "你写给母亲的信，写了很多版本，从未寄出。"
+    use: "整理思绪，表达无法说出口的情感。"
+    tags: ["personal", "writing", "emotional"]
+
+  - id: russian_dictionary
+    name: "俄语词典"
+    description: "从莫斯科书店买的旧词典，翻得起了毛边。"
+    use: "学习语言，也是融入新环境的工具。"
+    tags: ["learning", "language", "adaptation"]
+
+  - id: map_captured
+    name: "缴获的地图"
+    description: "德军的东线作战地图，上面标注了你熟悉的波兰地名。"
+    use: "了解战局，也让你看到战争的全貌。"
+    tags: ["intelligence", "military", "german"]
+
+  - id: harmonica
+    name: "口琴"
+    description: "瓦西里送给你的，说是'每个士兵都需要一点音乐'。"
+    use: "缓解压力，与战友建立情感联系。"
+    tags: ["personal", "music", "comfort"]
+
+  - id: bandages
+    name: "急救绷带"
+    description: "苏军野战配发，粗糙但救过你的命。"
+    use: "治疗伤口，也可以用来帮助他人获得信任。"
+    tags: ["medical", "survival", "resource"]
+
+  - id: compass
+    name: "指南针"
+    description: "苏联制，表盘上的西里尔字母你现在已经能读了。"
+    use: "辨别方向，在远东和朝鲜的陌生土地上尤其重要。"
+    tags: ["tool", "navigation", "military"]
+
+  - id: captured_sake
+    name: "日本清酒"
+    description: "在满洲缴获的战利品，你一直留着没喝。"
+    use: "与战友分享庆祝胜利，或者与战俘交换情报。"
+    tags: ["consumable", "loot", "japanese"]
+
+  - id: korean_letter
+    name: "朝鲜独立宣言"
+    description: "金英姬给你的复印件，用朝鲜语和俄语双语书写。"
+    use: "了解你为之战斗的这片土地的历史和渴望。"
+    tags: ["document", "korean", "political"]
+
+  - id: train_ticket
+    name: "西伯利亚铁路车票"
+    description: "1945年5月，从莫斯科到哈巴罗夫斯克，旅程四个月。"
+    use: "标志着你人生中最大的一次地理跨越。"
+    tags: ["document", "travel", "milestone"]
+
+  - id: winter_gloves
+    name: "羊毛手套"
+    description: "尼娜护士给你的，她说'你手冻得握不稳枪'。"
+    use: "保暖，也是一段暧昧记忆的载体。"
+    tags: ["personal", "gift", "emotional"]
+
+  - id: empty_shell
+    name: "空弹壳"
+    description: "你在斯大林格勒捡到的一颗弹壳，一直带在身边。"
+    use: "纪念物，提醒自己活过了那场地狱。"
+    tags: ["memento", "war", "personal"]

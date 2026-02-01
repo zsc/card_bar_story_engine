@@ -21,10 +21,14 @@ python -m cbse --game polish_solider
 Select via environment variables:
 
 - `CBSE_LLM_PROVIDER=mock|openai|gemini`
+- `CBSE_LLM_PROVIDER=ollama`
 - `CBSE_MODEL` 覆盖模型名（可选）
 - `OPENAI_API_KEY` 或 `GEMINI_API_KEY`
+ - `OLLAMA_BASE_URL` (optional, default `http://localhost:11434`)
 
 > openai/gemini providers are minimal and may change with upstream APIs.
+> Ollama uses the local HTTP API.
+> For Ollama, the prompt is auto-compact to improve JSON compliance on small models.
 
 ## Save/Load
 

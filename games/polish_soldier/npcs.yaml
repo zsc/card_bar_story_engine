@@ -1,0 +1,100 @@
+npcs:
+  - id: janek
+    name: "雅内克（Janek Kaczmarek）"
+    role: "波兰同乡，苏军列兵"
+    hook: "和你一样从波兰逃出来，是唯一知道你过去的人。"
+    secret: "他在华沙还有未婚妻，每个月都偷偷写无法寄出的信。"
+    manner: "乐观坚韧，总能在最糟的情况下讲笑话，但深夜会看着西边发呆。"
+    leverage: "你需要他的信任，他是唯一无条件站在你这边的人。"
+    location: "随部队移动"
+    tags: ["polish", "comrade", "friend"]
+
+  - id: vasily
+    name: "瓦西里（Vasily Petrov）"
+    role: "苏军老兵，上等兵"
+    hook: "1941年从莫斯科一路打到现在的俄罗斯人，知道如何在东线活下来。"
+    secret: "他其实是个木匠，战前从没杀过人，现在晚上要靠伏特加才能入睡。"
+    manner: "说话粗鲁但心善，用行动而非语言表达关心。"
+    leverage: "他教会你如何在苏军体系中生存，包括哪些规则可以打破。"
+    location: "斯大林格勒/远东"
+    tags: ["russian", "mentor", "veteran"]
+
+  - id: kowalski_captain
+    name: "科瓦尔斯基上尉（Capt. Tadeusz Kowalski）"
+    role: "苏军波兰师军官"
+    hook: "与你同姓的波兰军官，战前是华沙的中学教师，现在的榜样。"
+    secret: "他在卡廷惨案后一直在调查失踪的波兰军官，但从不公开谈论。"
+    manner: "冷静克制，说话慢而有分量，对下属保护有加。"
+    leverage: "他可以影响你的晋升和调动，也是你身份认同的一个参照。"
+    location: "波兰师指挥部"
+    tags: ["polish", "officer", "authority"]
+
+  - id: boris_political
+    name: "鲍里斯政委（Commissar Boris Sokolov）"
+    role: "NKVD出身的政治委员"
+    hook: "对你的'外国人'身份始终有怀疑，监控着你的言行。"
+    secret: "他自己也有犹太血统，在斯大林格勒后对你的态度微妙地改变了。"
+    manner: "公事公办，很少笑，但也不是不近人情——只是被体制训练成这样。"
+    leverage: "他可以毁掉你的军旅生涯，也可以成为你的保护者。"
+    location: "随部队"
+    tags: ["soviet", "political", "authority"]
+
+  - id: yuri_sergeant
+    name: "尤里中士（Sgt. Yuri Volkov）"
+    role: "乌克兰人，你的直属班长"
+    hook: "公正严明，对事不对人，只关心你能不能完成战斗任务。"
+    secret: "他的家乡被德军占领过，对'解放'这个词有切身的理解。"
+    manner: "寡言少语，命令简洁，但从不让手下白白送死。"
+    leverage: "他决定了你在部队中的位置和任务分配。"
+    location: "前线"
+    tags: ["ukrainian", "n_co", "professional"]
+
+  - id: kim_young_hee
+    name: "金英姬（Kim Young-hee）"
+    role: "朝鲜向导，朝鲜独立同盟成员"
+    hook: "会说流利的俄语，带领你们穿越朝鲜的群山。"
+    secret: "她的家人在日本统治下失散，对'解放'有复杂的情感。"
+    manner: "安静而警觉，对这片土地的了解比任何地图都精确。"
+    leverage: "她掌握着通往汉城的最快路线，也知道哪些村庄有日军残余。"
+    location: "朝鲜"
+    tags: ["korean", "guide", "resistance"]
+
+  - id: nina_nurse
+    name: "尼娜护士（Nina Sergeyeva）"
+    role: "苏军野战医院护士"
+    hook: "在斯大林格勒救过你一命，之后总能让你感到安心。"
+    secret: "她战争爆发时还是医学院学生，已经见过太多死亡。"
+    manner: "温柔但坚韧，能在混乱中保持冷静。"
+    leverage: "她影响着你对这场战争人道主义方面的看法。"
+    location: "野战医院"
+    tags: ["russian", "medical", "caregiver"]
+
+  - id: grisha_tanker
+    name: "格里沙（Grisha Antonov）"
+    role: "T-34坦克车长"
+    hook: "库尔斯克会战时与你并肩作战，之后成为朋友。"
+    secret: "他的坦克组已经换了五批乘员，他是唯一的幸存者。"
+    manner: "豪爽外向，喜欢分享食物和故事，但从不谈死去的组员。"
+    leverage: "他代表着苏军技术兵种的力量，也让你看到战争的另一面。"
+    location: "装甲部队"
+    tags: ["russian", "tanker", "friend"]
+
+  - id: old_peasant
+    name: "老农夫（无名）"
+    role: "白俄罗斯/波兰边境的农民"
+    hook: "在你在逃亡时给你食物和庇护，不问任何问题。"
+    secret: "他的两个儿子分别死在波兰军和苏军里，对战争已经麻木。"
+    manner: "沉默寡言，用行动而非语言表达善意。"
+    leverage: "他代表着普通人在战争中的处境和选择。"
+    location: "边境村庄"
+    tags: ["civilian", "victim", "silent"]
+
+  - id: japanese_pOW
+    name: "佐藤（Sato）"
+    role: "日军战俘"
+    hook: "在满洲被俘的日本兵，与你同龄。"
+    secret: "他也是农民的儿子，被征召前从未离开过北海道。"
+    manner: "恐惧而顺从，但眼神里有和你一样的迷茫。"
+    leverage: "他让你意识到，敌人的士兵和你并没有太大不同。"
+    location: "战俘营"
+    tags: ["japanese", "enemy", "prisoner"]

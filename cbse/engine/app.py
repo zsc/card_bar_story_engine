@@ -11,7 +11,7 @@ from textual.containers import Horizontal, Vertical
 from textual.widgets import Footer, Input, Markdown, Static
 
 from cbse.engine.content_loader import ContentLoader, GameContent, index_variables
-from cbse.engine.llm import GeminiProvider, MockProvider, OpenAIProvider
+from cbse.engine.llm import GeminiProvider, MockProvider, OpenAIProvider, OllamaProvider
 from cbse.engine.llm_service import LLMResult, LLMService
 from cbse.engine.models import Choice, EndState, Event, TurnRecord
 from cbse.engine.prompt_builder import PromptBuilder, PromptContext
@@ -156,6 +156,8 @@ class CardBarApp(App):
         self.refresh_ui()
         if self.replay_file:
             self._start_replay(self.replay_file)
+        else:
+            self.call_later(self._auto_start_turn)
 
     def load_game(self, game_id: str) -> None:
         content = self.content_loader.load_game(game_id)
@@ -186,22 +188,33 @@ class CardBarApp(App):
     def _create_llm_service(self) -> LLMService:
         assert self.content is not None
         provider = os.getenv("CBSE_LLM_PROVIDER", "mock").lower()
-        model = os.getenv("CBSE_MODEL", self.content.definition.llm.recommended_model or "gpt-4.1-mini")
+        default_model = self.content.definition.llm.recommended_model or "gpt-4.1-mini"
+        model = os.getenv("CBSE_MODEL", default_model)
         temp = self.content.definition.llm.temperature
         max_tokens = self.content.definition.llm.max_output_tokens
 
         if provider == "openai":
             client = OpenAIProvider(model=model, temperature=temp, max_output_tokens=max_tokens)
+            lenient_json = False
         elif provider == "gemini":
             client = GeminiProvider(model=model, temperature=temp, max_output_tokens=max_tokens)
+            lenient_json = False
+        elif provider == "ollama":
+            model = os.getenv("CBSE_MODEL", "qwen3-vl:2b")
+            if self.prompt_builder:
+                self.prompt_builder.compact = True
+                self.prompt_builder.world_max_chars = 4000
+            client = OllamaProvider(model=model, temperature=temp, max_output_tokens=max_tokens)
+            lenient_json = True
         else:
             locations = []
             for var in self.content.definition.variables:
                 if var.id == "location" and var.enum_values:
                     locations = var.enum_values
             client = MockProvider(set(self.variables_index.keys()), locations)
+            lenient_json = False
 
-        return LLMService(client=client, validator=self.validator)
+        return LLMService(client=client, validator=self.validator, lenient_json=lenient_json)
 
     def refresh_ui(self) -> None:
         if not self.content or not self.store:
@@ -448,6 +461,11 @@ class CardBarApp(App):
     def _stop_replay(self) -> None:
         self.replay_active = False
         self.replay_inputs = []
+
+    def _auto_start_turn(self) -> None:
+        if not self.store or self.store.history:
+            return
+        self._run_turn("开始", from_replay=True)
 
 
 def main() -> None:

@@ -1,0 +1,360 @@
+triggers:
+  # 时间推进触发器
+  - id: poland_falls
+    priority: 1
+    once: true
+    when: "year.year >= 1939 and year.month >= 10 and location == '波兰'"
+    effects:
+      - op: set
+        path: "flags.joined_red_army"
+        value: true
+        reason: "波兰沦陷，必须做出选择"
+      - op: inc
+        path: "trauma"
+        value: 10
+        reason: "目睹祖国沦陷"
+      - op: push
+        path: "truth_map"
+        value: "1939年10月，华沙向德军投降。"
+        reason: "历史记录"
+    events:
+      - type: "history"
+        message: "华沙沦陷的消息传来，你站在维斯瓦河畔，不知何去何从。"
+
+  - id: barbarossa
+    priority: 2
+    once: true
+    when: "year.year >= 1941 and year.month >= 6 and flags.joined_red_army == true"
+    effects:
+      - op: set
+        path: "campaign_stage"
+        value: "苏德战争初期"
+        reason: "巴巴罗萨行动开始"
+      - op: inc
+        path: "discipline"
+        value: 10
+        reason: "战争爆发，军队纪律收紧"
+      - op: push
+        path: "truth_map"
+        value: "1941年6月22日，德国入侵苏联。"
+        reason: "历史记录"
+    events:
+      - type: "history"
+        message: "德国人的坦克开进了苏联。你听到这个消息时，内心竟有一丝复杂的情绪。"
+
+  - id: battle_of_moscow
+    priority: 3
+    once: true
+    when: "year.year >= 1941 and year.month >= 12 and campaign_stage == '苏德战争初期'"
+    effects:
+      - op: set
+        path: "location"
+        value: "莫斯科"
+        reason: "莫斯科保卫战"
+      - op: set
+        path: "rank"
+        value: "列兵"
+        reason: "正式入伍"
+      - op: inc
+        path: "experience"
+        value: 15
+        reason: "首次参战"
+      - op: inc
+        path: "trauma"
+        value: 15
+        reason: "战火的洗礼"
+      - op: push
+        path: "truth_map"
+        value: "1941年冬，你以苏军列兵身份参加莫斯科保卫战。"
+        reason: "个人史"
+    events:
+      - type: "milestone"
+        message: "莫斯科郊外的雪地里，你第一次向德国人开火。"
+
+  - id: stalingrad
+    priority: 4
+    once: true
+    when: "year.year >= 1942 and year.month >= 8 and experience >= 20"
+    effects:
+      - op: set
+        path: "campaign_stage"
+        value: "斯大林格勒"
+      - op: set
+        path: "location"
+        value: "斯大林格勒"
+      - op: inc
+        path: "experience"
+        value: 20
+        reason: "斯大林格勒炼狱"
+      - op: inc
+        path: "trauma"
+        value: 20
+        reason: "人间地狱"
+      - op: dec
+        path: "morale"
+        value: 10
+        reason: "消耗战"
+    events:
+      - type: "warning"
+        message: "斯大林格勒。你来之前以为已经见过地狱。"
+
+  - id: stalingrad_survived
+    priority: 5
+    once: true
+    when: "campaign_stage == '斯大林格勒' and experience >= 45 and hp > 0"
+    effects:
+      - op: set
+        path: "flags.survived_stalingrad"
+        value: true
+      - op: set
+        path: "rank"
+        value: "下士"
+      - op: inc
+        path: "discipline"
+        value: 15
+      - op: push
+        path: "decorations"
+        value: "斯大林格勒防御奖章"
+      - op: push
+        path: "truth_map"
+        value: "你活过了斯大林格勒，活过了1943年2月。"
+    events:
+      - type: "breakthrough"
+        message: "保卢斯投降的那天，你站在废墟中，发现自己竟然还活着。"
+
+  - id: kursk
+    priority: 6
+    once: true
+    when: "year.year >= 1943 and year.month >= 7 and flags.survived_stalingrad == true"
+    effects:
+      - op: set
+        path: "campaign_stage"
+        value: "库尔斯克"
+      - op: inc
+        path: "experience"
+        value: 15
+      - op: push
+        path: "truth_map"
+        value: "1943年7月，库尔斯克会战——史上最大规模坦克战。"
+    events:
+      - type: "history"
+        message: "坦克的轰鸣声响彻库尔斯克平原。"
+
+  - id: bagration
+    priority: 7
+    once: true
+    when: "year.year >= 1944 and year.month >= 6 and experience >= 60"
+    effects:
+      - op: set
+        path: "campaign_stage"
+        value: "巴格拉季昂"
+      - op: inc
+        path: "experience"
+        value: 15
+      - op: inc
+        path: "trauma"
+        value: 10
+    events:
+      - type: "milestone"
+        message: "巴格拉季昂行动解放了白俄罗斯，但你的家乡还在德国人手中。"
+
+  - id: warsaw_uprising
+    priority: 8
+    once: true
+    when: "year.year >= 1944 and year.month >= 8 and year.month <= 10"
+    effects:
+      - op: set
+        path: "flags.saw_warsaw_gone"
+        value: true
+      - op: dec
+        path: "morale"
+        value: 15
+      - op: dec
+        path: "identity"
+        value: 20
+      - op: push
+        path: "truth_map"
+        value: "1944年8月，华沙起义。红军的坦克停在维斯瓦河东岸，没有过河。"
+    events:
+      - type: "warning"
+        message: "你能听到河对岸华沙的枪声。你的同胞在战斗，而你被命令按兵不动。"
+
+  - id: transfer_to_far_east
+    priority: 9
+    once: true
+    when: "year.year >= 1945 and year.month >= 5 and experience >= 65"
+    effects:
+      - op: set
+        path: "flags.transferred_to_far_east"
+        value: true
+      - op: set
+        path: "campaign_stage"
+        value: "远东调防"
+      - op: set
+        path: "location"
+        value: "西伯利亚"
+      - op: inc
+        path: "discipline"
+        value: 10
+      - op: push
+        path: "truth_map"
+        value: "1945年5月欧洲胜利日后，你被调往远东准备对日作战。"
+    events:
+      - type: "milestone"
+        message: "柏林陷落后，你们这支部队接到了神秘的东调命令。"
+
+  - id: manchurian_offensive
+    priority: 10
+    once: true
+    when: "year.year >= 1945 and year.month >= 8 and flags.transferred_to_far_east == true"
+    effects:
+      - op: set
+        path: "campaign_stage"
+        value: "满洲战役"
+      - op: set
+        path: "location"
+        value: "满洲"
+      - op: inc
+        path: "experience"
+        value: 10
+      - op: push
+        path: "truth_map"
+        value: "1945年8月9日，苏军发动八月风暴行动。"
+    events:
+      - type: "history"
+        message: "广岛之后，苏联对日宣战。你的战争进入了最后阶段。"
+
+  - id: enter_korea
+    priority: 11
+    once: true
+    when: "campaign_stage == '满洲战役' and experience >= 75"
+    effects:
+      - op: set
+        path: "flags.entered_korea"
+        value: true
+      - op: set
+        path: "campaign_stage"
+        value: "解放朝鲜"
+      - op: set
+        path: "location"
+        value: "朝鲜"
+      - op: inc
+        path: "experience"
+        value: 10
+      - op: push
+        path: "decorations"
+        value: "战胜日本奖章"
+    events:
+      - type: "breakthrough"
+        message: "你跨过鸭绿江，踏上朝鲜的土地。这是六年来你离家乡最远的一次。"
+
+  - id: war_ends
+    priority: 12
+    once: true
+    when: "year.year >= 1945 and year.month >= 9 and flags.entered_korea == true"
+    effects:
+      - op: set
+        path: "campaign_stage"
+        value: "战后"
+      - op: inc
+        path: "morale"
+        value: 20
+      - op: push
+        path: "truth_map"
+        value: "1945年9月2日，日本正式签署投降书。第二次世界大战结束。"
+    events:
+      - type: "end"
+        message: "战争结束了。六年前你是波兰农民的儿子，现在你是一个走过半个世界的士兵。"
+
+  # 状态触发器
+  - id: trauma_breakdown
+    priority: 20
+    once: true
+    when: "trauma >= 80 and flags.questioned_war == false"
+    effects:
+      - op: set
+        path: "flags.questioned_war"
+        value: true
+      - op: dec
+        path: "morale"
+        value: 20
+      - op: dec
+        path: "discipline"
+        value: 15
+    events:
+      - type: "warning"
+        message: "你开始质疑这一切的意义。那些死去的人，那些你杀过的人，都在夜里看着你。"
+
+  - id: low_morale_warning
+    priority: 21
+    once: true
+    when: "morale <= 20 and hp > 30"
+    effects:
+      - op: dec
+        path: "discipline"
+        value: 10
+    events:
+      - type: "warning"
+        message: "你的眼神变得空洞。战友开始担心你的状态。"
+
+  - id: comradeship_high
+    priority: 22
+    once: true
+    when: "comradeship >= 80 and flags.saved_comrade == false"
+    effects:
+      - op: set
+        path: "flags.saved_comrade"
+        value: true
+      - op: push
+        path: "truth_map"
+        value: "你在战场上救过战友的命。"
+    events:
+      - type: "breakthrough"
+        message: "雅内克拍拍你的肩膀：'没有你，我早就埋在这片土里了。'"
+
+  - id: identity_crisis
+    priority: 23
+    once: true
+    when: "identity <= -50 and flags.saw_warsaw_gone == true"
+    effects:
+      - op: inc
+        path: "trauma"
+        value: 10
+    events:
+      - type: "warning"
+        message: "你越来越确定自己只是个被迫穿上苏军制服的波兰人。"
+
+  - id: soviet_identity
+    priority: 24
+    once: true
+    when: "identity >= 50 and discipline >= 70"
+    effects:
+      - op: inc
+        path: "relationships.boris_political"
+        value: 20
+      - op: push
+        path: "truth_map"
+        value: "你开始用'我们苏联人'来称呼自己与战友。"
+    events:
+      - type: "info"
+        message: "鲍里斯政委看你的眼神多了一丝认可。"
+
+  # 死亡触发器
+  - id: death_wounded
+    priority: 100
+    once: false
+    when: "hp <= 0"
+    effects: []
+    events:
+      - type: "end"
+        message: "一颗子弹、一块弹片、或者只是运气用尽——战争收回了你的性命。"
+
+  # 精神崩溃
+  - id: mental_breakdown
+    priority: 101
+    once: false
+    when: "morale <= 0 and trauma >= 80"
+    effects: []
+    events:
+      - type: "end"
+        message: "你放下了枪，走向荒野。有些战争不是每个人都能打完的。"
