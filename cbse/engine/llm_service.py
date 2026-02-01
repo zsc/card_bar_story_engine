@@ -21,12 +21,10 @@ class LLMService:
         client: LLMClient,
         validator: SchemaValidator,
         max_retries: int = 2,
-        lenient_json: bool = False,
     ) -> None:
         self.client = client
         self.validator = validator
         self.max_retries = max_retries
-        self.lenient_json = lenient_json
 
     def generate(self, messages: list[dict[str, str]]) -> LLMResult:
         try:
@@ -37,13 +35,6 @@ class LLMService:
             raw = getattr(exc, "raw", "") or ""
             error = str(exc)
 
-        if self.lenient_json and raw:
-            try:
-                output = self.validator.coerce(raw)
-                return LLMResult(output=output, raw=raw, used_fallback=False, error="coerced")
-            except Exception:
-                pass
-
         for _ in range(self.max_retries):
             repair_messages = self._repair_messages(error, raw)
             try:
@@ -52,13 +43,6 @@ class LLMService:
                 return LLMResult(output=output, raw=raw, used_fallback=False)
             except Exception as exc:
                 error = str(exc)
-
-            if self.lenient_json and raw:
-                try:
-                    output = self.validator.coerce(raw)
-                    return LLMResult(output=output, raw=raw, used_fallback=False, error="coerced")
-                except Exception:
-                    pass
 
         fallback = self._fallback_output()
         return LLMResult(output=fallback, raw=raw, used_fallback=True, error=error)

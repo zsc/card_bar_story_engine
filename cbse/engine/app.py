@@ -195,26 +195,32 @@ class CardBarApp(App):
 
         if provider == "openai":
             client = OpenAIProvider(model=model, temperature=temp, max_output_tokens=max_tokens)
-            lenient_json = False
         elif provider == "gemini":
             client = GeminiProvider(model=model, temperature=temp, max_output_tokens=max_tokens)
-            lenient_json = False
         elif provider == "ollama":
             model = os.getenv("CBSE_MODEL", "qwen3-vl:2b")
+            num_ctx_env = os.getenv("CBSE_OLLAMA_NUM_CTX")
+            num_ctx = int(num_ctx_env) if num_ctx_env else 4096
+            format_mode = os.getenv("CBSE_OLLAMA_FORMAT") or "json_schema"
             if self.prompt_builder:
                 self.prompt_builder.compact = True
-                self.prompt_builder.world_max_chars = 4000
-            client = OllamaProvider(model=model, temperature=temp, max_output_tokens=max_tokens)
-            lenient_json = True
+                self.prompt_builder.world_max_chars = 1600
+            client = OllamaProvider(
+                model=model,
+                temperature=temp,
+                max_output_tokens=max_tokens,
+                json_schema=self.validator.json_schema(),
+                num_ctx=num_ctx,
+                format_mode=format_mode,
+            )
         else:
             locations = []
             for var in self.content.definition.variables:
                 if var.id == "location" and var.enum_values:
                     locations = var.enum_values
             client = MockProvider(set(self.variables_index.keys()), locations)
-            lenient_json = False
 
-        return LLMService(client=client, validator=self.validator, lenient_json=lenient_json)
+        return LLMService(client=client, validator=self.validator)
 
     def refresh_ui(self) -> None:
         if not self.content or not self.store:

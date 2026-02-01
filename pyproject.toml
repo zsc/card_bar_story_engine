@@ -21,3 +21,7 @@ cbse = "cbse.__main__:main"
 [tool.ruff]
 line-length = 100
 
+[tool.pytest.ini_options]
+markers = [
+  "integration: tests that require external services",
+]

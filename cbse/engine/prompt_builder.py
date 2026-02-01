@@ -40,10 +40,11 @@ class PromptBuilder:
 
     def _system_message(self) -> str:
         return (
-            "You are the narrative engine. Output ONLY valid JSON matching the schema. "
-            "Do not include code fences. Required fields: narrative_markdown, choices, "
-            "state_updates, new_facts, events, end. choices length 3-6. "
-            "state_updates length 0-6."
+            "You are the narrative engine. Output ONLY a single JSON object. "
+            "No markdown, no code fences, no comments. "
+            "Required fields: narrative_markdown, choices, state_updates, new_facts, events, end. "
+            "choices length 3-6. state_updates length 0-6. "
+            "end must be an object with is_game_over, ending_id, reason."
         )
 
     def _developer_message(self, ctx: PromptContext) -> str:
@@ -76,6 +77,15 @@ class PromptBuilder:
             "  events: [{type,message}],\n"
             "  end: {is_game_over, ending_id, reason}\n"
             "}\n"
+            "Return JSON only. Example minimal JSON:\n"
+            "{\"narrative_markdown\":\"...\","
+            "\"choices\":["
+            "{\"id\":\"c1\",\"label\":\"...\",\"hint\":\"\",\"risk\":\"low\",\"tags\":[]},"
+            "{\"id\":\"c2\",\"label\":\"...\",\"hint\":\"\",\"risk\":\"medium\",\"tags\":[]},"
+            "{\"id\":\"c3\",\"label\":\"...\",\"hint\":\"\",\"risk\":\"high\",\"tags\":[]}"
+            "],"
+            "\"state_updates\":[],\"new_facts\":[],\"events\":[],"
+            "\"end\":{\"is_game_over\":false,\"ending_id\":\"\",\"reason\":\"\"}}\n"
         )
 
     def _user_message(self, ctx: PromptContext) -> str:

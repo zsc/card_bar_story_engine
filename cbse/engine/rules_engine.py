@@ -225,7 +225,7 @@ class RulesEngine:
             return EndState(is_game_over=True, ending_id="lose", reason="lose")
         if win:
             return EndState(is_game_over=True, ending_id="win", reason="win")
-        return EndState()
+        return EndState(is_game_over=False, ending_id="", reason="")
 
 
 # Safe expression evaluation for trigger DSL

@@ -24,6 +24,92 @@ def extract_json(text: str) -> str:
 
 
 class SchemaValidator:
+    @staticmethod
+    def json_schema() -> dict:
+        return {
+            "type": "object",
+            "additionalProperties": False,
+            "required": [
+                "narrative_markdown",
+                "choices",
+                "state_updates",
+                "new_facts",
+                "events",
+                "end",
+            ],
+            "properties": {
+                "narrative_markdown": {"type": "string"},
+                "choices": {
+                    "type": "array",
+                    "minItems": 3,
+                    "maxItems": 6,
+                    "items": {
+                        "type": "object",
+                        "additionalProperties": False,
+                        "required": ["id", "label", "hint", "risk", "tags"],
+                        "properties": {
+                            "id": {"type": "string"},
+                            "label": {"type": "string"},
+                            "hint": {"type": "string"},
+                            "risk": {"type": "string", "enum": ["low", "medium", "high"]},
+                            "tags": {"type": "array", "items": {"type": "string"}},
+                        },
+                    },
+                },
+                "state_updates": {
+                    "type": "array",
+                    "maxItems": 6,
+                    "items": {
+                        "type": "object",
+                        "additionalProperties": False,
+                        "required": ["op", "path", "value", "reason"],
+                        "properties": {
+                            "op": {
+                                "type": "string",
+                                "enum": ["set", "inc", "dec", "push", "remove", "toggle"],
+                            },
+                            "path": {"type": "string"},
+                            "value": {
+                                "type": [
+                                    "string",
+                                    "number",
+                                    "integer",
+                                    "boolean",
+                                    "object",
+                                    "array",
+                                    "null",
+                                ]
+                            },
+                            "reason": {"type": "string"},
+                        },
+                    },
+                },
+                "new_facts": {"type": "array", "items": {"type": "string"}},
+                "events": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "additionalProperties": False,
+                        "required": ["type", "message"],
+                        "properties": {
+                            "type": {"type": "string"},
+                            "message": {"type": "string"},
+                        },
+                    },
+                },
+                "end": {
+                    "type": "object",
+                    "additionalProperties": False,
+                    "required": ["is_game_over", "ending_id", "reason"],
+                    "properties": {
+                        "is_game_over": {"type": "boolean"},
+                        "ending_id": {"type": "string"},
+                        "reason": {"type": "string"},
+                    },
+                },
+            },
+        }
+
     def parse(self, text: str) -> LLMOutput:
         try:
             json_text = extract_json(text)
@@ -119,7 +205,7 @@ class SchemaValidator:
         elif isinstance(end_raw, bool):
             end = EndState(is_game_over=end_raw, ending_id="", reason="")
         else:
-            end = EndState()
+            end = EndState(is_game_over=False, ending_id="", reason="")
 
         events.append(Event(type="coerced_output", message="Coerced invalid LLM JSON into schema."))
 

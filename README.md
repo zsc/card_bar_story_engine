@@ -25,6 +25,8 @@ Select via environment variables:
 - `CBSE_MODEL` 覆盖模型名（可选）
 - `OPENAI_API_KEY` 或 `GEMINI_API_KEY`
  - `OLLAMA_BASE_URL` (optional, default `http://localhost:11434`)
+ - `CBSE_OLLAMA_NUM_CTX` (optional, default `4096`)
+ - `CBSE_OLLAMA_FORMAT` (`json` or `json_schema`, default `json`)
 
 > openai/gemini providers are minimal and may change with upstream APIs.
 > Ollama uses the local HTTP API.

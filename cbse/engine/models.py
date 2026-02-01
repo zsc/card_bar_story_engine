@@ -93,9 +93,9 @@ class Choice(BaseModel):
 
     id: str
     label: str
-    hint: str = ""
-    risk: Literal["low", "medium", "high"] = "low"
-    tags: list[str] = Field(default_factory=list)
+    hint: str
+    risk: Literal["low", "medium", "high"]
+    tags: list[str]
 
 
 class StateUpdateOp(BaseModel):
@@ -103,8 +103,8 @@ class StateUpdateOp(BaseModel):
 
     op: Literal["set", "inc", "dec", "push", "remove", "toggle"]
     path: str
-    value: Any = None
-    reason: str = ""
+    value: Any
+    reason: str
 
 
 class Event(BaseModel):
@@ -117,9 +117,9 @@ class Event(BaseModel):
 class EndState(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
-    is_game_over: bool = False
-    ending_id: str = ""
-    reason: str = ""
+    is_game_over: bool
+    ending_id: str
+    reason: str
 
 
 class LLMOutput(BaseModel):
@@ -128,9 +128,9 @@ class LLMOutput(BaseModel):
     narrative_markdown: str
     choices: list[Choice]
     state_updates: list[StateUpdateOp]
-    new_facts: list[str] = Field(default_factory=list)
-    events: list[Event] = Field(default_factory=list)
-    end: EndState = Field(default_factory=EndState)
+    new_facts: list[str]
+    events: list[Event]
+    end: EndState
 
     @model_validator(mode="after")
     def validate_counts(self) -> "LLMOutput":
