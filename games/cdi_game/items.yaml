@@ -1,0 +1,42 @@
+items:
+  - id: car_key
+    name: "智能车钥匙"
+    description: "不只是钥匙，也是你的生物识别凭证。"
+    use: "解锁车辆、启动引擎、存储个人设置。"
+    tags: ["personal", "essential"]
+
+  - id: phone
+    name: "手机"
+    description: "与 CDI 系统深度集成，但 CA 会帮你减少对它的依赖。"
+    use: "远程控制车辆、查看状态、接收通知。"
+    tags: ["personal", "interface"]
+
+  - id: coffee_cup
+    name: "保温杯"
+    description: "杯架里的常客，装着今天的第一杯咖啡。"
+    use: "CA 会记住你的饮品偏好，适时提醒你别洒了。"
+    tags: ["personal", "comfort"]
+
+  - id: dashcam_footage
+    name: "行车记录仪片段"
+    description: "DA 记录的关键时刻，可以在停车后查看。"
+    use: "了解 DA 为何介入，学习如何更好地与它配合。"
+    tags: ["data", "education"]
+
+  - id: map_book
+    name: "古镇手绘地图"
+    description: "王阿姨送你的，纸上导航的浪漫。"
+    use: "让你思考 CA 的导航与纸质地图的区别和联系。"
+    tags: ["gift", "nostalgia"]
+
+  - id: charging_card
+    name: "充电会员卡"
+    description: "小哥送你的，全国主要充电网络通用。"
+    use: "解锁更多充电优惠，也让 CA 学习你的充电习惯。"
+    tags: ["gift", "utility"]
+
+  - id: voice_log
+    name: "与 CA 的对话记录"
+    description: "系统自动保存的交互历史，你可以选择删除或保留。"
+    use: "回顾你与 CDI 系统的互动，见证信任的建立。"
+    tags: ["data", "memory"]

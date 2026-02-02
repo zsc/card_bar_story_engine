@@ -1,0 +1,307 @@
+triggers:
+  - id: first_conversation
+    priority: 1
+    once: true
+    when: "flags.first_meeting == true"
+    effects:
+      - op: set
+        path: "flags.first_meeting"
+        value: false
+        reason: "完成初次介绍"
+      - op: inc
+        path: "ca_conversations"
+        value: 1
+        reason: "首次对话"
+    events:
+      - type: "info"
+        message: "CA 正在学习你的偏好。"
+
+  - id: commute_complete
+    priority: 5
+    once: true
+    when: "location == '公司停车场' and flags.commute_done == false"
+    effects:
+      - op: set
+        path: "flags.commute_done"
+        value: true
+        reason: "完成首次通勤"
+      - op: inc
+        path: "satisfaction"
+        value: 10
+        reason: "顺利到达公司"
+      - op: push
+        path: "memories"
+        value: "第一次和 CDI 一起通勤，雨天的早高峰没那么糟糕了"
+        reason: "共同记忆"
+    events:
+      - type: "breakthrough"
+        message: "你到达了公司，比预计时间还早了五分钟。"
+
+  - id: trip_start
+    priority: 6
+    once: true
+    when: "location == '高速公路' and flags.trip_started == false and flags.commute_done == true"
+    effects:
+      - op: set
+        path: "flags.trip_started"
+        value: true
+        reason: "自驾游开始"
+      - op: inc
+        path: "trust_ca"
+        value: 5
+        reason: "CA 的路线规划很合理"
+      - op: push
+        path: "memories"
+        value: "和 CA 一起规划了第一次自驾游"
+        reason: "共同记忆"
+    events:
+      - type: "info"
+        message: "自驾游正式开始了。"
+
+  - id: rain_mode_active
+    priority: 10
+    once: true
+    when: "flags.rain_mode == false and (location == '城市快速路' or location == '高速公路')"
+    effects:
+      - op: set
+        path: "flags.rain_mode"
+        value: true
+        reason: "雨天模式"
+      - op: inc
+        path: "knowledge_da"
+        value: 5
+        reason: "体验 DA 的雨天策略"
+    events:
+      - type: "warning"
+        message: "DA：路面湿滑，增大跟车距离。"
+
+  - id: da_first_intervention
+    priority: 11
+    once: true
+    when: "da_interventions >= 1 and knowledge_da < 20"
+    effects:
+      - op: inc
+        path: "knowledge_da"
+        value: 10
+        reason: "首次体验 DA 介入"
+      - op: push
+        path: "memories"
+        value: "第一次感受到 DA 的瞬间接管，有点惊险但也很安心"
+        reason: "关键时刻"
+    events:
+      - type: "info"
+        message: "你可以在停车后查看刚才 DA 介入的原因。"
+
+  - id: low_battery_warning
+    priority: 15
+    once: true
+    when: "battery <= 30 and flags.low_battery_alert == false"
+    effects:
+      - op: set
+        path: "flags.low_battery_alert"
+        value: true
+        reason: "低电量提醒"
+      - op: inc
+        path: "ca_conversations"
+        value: 1
+        reason: "CA 主动提醒"
+    events:
+      - type: "warning"
+        message: "CA：电量还有 30%，需要我帮你找最近的充电桩吗？"
+
+  - id: charging_complete
+    priority: 16
+    once: true
+    when: "flags.charging_done == false and flags.low_battery_alert == true and battery >= 80"
+    effects:
+      - op: set
+        path: "flags.charging_done"
+        value: true
+        reason: "完成充电"
+      - op: inc
+        path: "satisfaction"
+        value: 5
+        reason: "充电顺利"
+      - op: push
+        path: "memories"
+        value: "在服务区充电时和网约车小哥聊了很多"
+        reason: "偶遇"
+    events:
+      - type: "info"
+        message: "车辆已充至 80%，可以继续旅程了。"
+
+  - id: fatigue_warning
+    priority: 20
+    once: true
+    when: "fatigue >= 60 and flags.fatigue_warning == false"
+    effects:
+      - op: set
+        path: "flags.fatigue_warning"
+        value: true
+        reason: "疲劳警示"
+    events:
+      - type: "warning"
+        message: "CA：检测到你有疲劳迹象，建议休息。DA 已提高警惕。"
+
+  - id: scenic_stop
+    priority: 25
+    once: true
+    when: "location == '景区山路' and flags.scenic_stop_done == false"
+    effects:
+      - op: set
+        path: "flags.scenic_stop_done"
+        value: true
+        reason: "景点停留"
+      - op: dec
+        path: "fatigue"
+        value: 15
+        reason: "短暂休息"
+      - op: inc
+        path: "trust_ca"
+        value: 5
+        reason: "CA 推荐的观景点很棒"
+    events:
+      - type: "info"
+        message: "风景很美，CA 建议你休息十分钟。"
+
+  - id: help_tourist
+    priority: 30
+    once: true
+    when: "location == '古镇街道' and flags.tourist_helped == false"
+    effects:
+      - op: set
+        path: "flags.tourist_helped"
+        value: true
+        reason: "帮助游客"
+      - op: inc
+        path: "satisfaction"
+        value: 10
+        reason: "助人为乐"
+      - op: inc
+        path: "trust_ca"
+        value: 5
+        reason: "CA 帮助翻译和导航"
+    events:
+      - type: "breakthrough"
+        message: "王阿姨很感激你的帮助，送了你一份手绘地图。"
+
+  - id: night_driving
+    priority: 35
+    once: true
+    when: "flags.night_mode == false and flags.return_trip == true"
+    effects:
+      - op: set
+        path: "flags.night_mode"
+        value: true
+        reason: "夜间模式"
+      - op: inc
+        path: "knowledge_da"
+        value: 5
+        reason: "体验夜间驾驶策略"
+    events:
+      - type: "info"
+        message: "DA：切换夜间感知模式，增强对向车辆检测。"
+
+  - id: return_trip_start
+    priority: 36
+    once: true
+    when: "location == '返程高速' and flags.return_trip == false"
+    effects:
+      - op: set
+        path: "flags.return_trip"
+        value: true
+        reason: "返程开始"
+      - op: push
+        path: "memories"
+        value: "返程的路上，开始理解 DA 和 CA 的分层配合"
+        reason: "感悟"
+    events:
+      - type: "info"
+        message: "返程开始了，天色渐暗。"
+
+  - id: emergency_avoided
+    priority: 40
+    once: true
+    when: "flags.emergency_handled == false and da_interventions >= 3"
+    effects:
+      - op: set
+        path: "flags.emergency_handled"
+        value: true
+        reason: "应急处理"
+      - op: inc
+        path: "trust_da"
+        value: 15
+        reason: "DA 成功避免危险"
+      - op: push
+        path: "memories"
+        value: "DA 在关键时刻的瞬间接管让我避免了事故"
+        reason: "信任建立"
+    events:
+      - type: "breakthrough"
+        message: "你意识到 DA 刚才救了你。"
+
+  - id: trust_milestone_da
+    priority: 50
+    once: true
+    when: "trust_da >= 70 and knowledge_da >= 40"
+    effects:
+      - op: push
+        path: "unlocked_features"
+        value: "DA 详细解释模式"
+        reason: "信任解锁"
+    events:
+      - type: "info"
+        message: "DA 已为你开启详细解释模式，停车后可以查看更多决策原因。"
+
+  - id: trust_milestone_ca
+    priority: 51
+    once: true
+    when: "trust_ca >= 70 and ca_conversations >= 10"
+    effects:
+      - op: push
+        path: "unlocked_features"
+        value: "CA 主动建议模式"
+        reason: "默契解锁"
+    events:
+      - type: "info"
+        message: "CA 与你的默契度提升，会更主动地提供个性化建议。"
+
+  - id: final_arrival
+    priority: 90
+    once: true
+    when: "location == '家中车库' and flags.return_trip == true"
+    effects:
+      - op: set
+        path: "flags.final_scene"
+        value: true
+        reason: "旅程结束"
+    events:
+      - type: "breakthrough"
+        message: "你到家了。这次旅程改变了你对 CDI 的看法。"
+
+  - id: high_satisfaction
+    priority: 95
+    once: true
+    when: "satisfaction >= 90 and flags.final_scene == true"
+    effects: []
+    events:
+      - type: "end"
+        message: "你已经完全信任 CDI 系统，它成为了你最可靠的出行伙伴。"
+
+  - id: low_trust_da
+    priority: 99
+    once: false
+    when: "trust_da <= 10"
+    effects: []
+    events:
+      - type: "end"
+        message: "你对 Driving Assistant 失去了信任，决定关闭辅助功能。"
+
+  - id: low_trust_ca
+    priority: 99
+    once: false
+    when: "trust_ca <= 10"
+    effects: []
+    events:
+      - type: "end"
+        message: "你与 Cockpit Assistant 无法建立有效沟通，使用体验大打折扣。"

@@ -1,0 +1,259 @@
+game_id: cdi_game
+title: "CDI：一路同行"
+version: "1.0.0"
+language: "zh-CN"
+tone: "sci-fi_daily"
+content_rating: "PG"
+
+llm:
+  recommended_model: "gpt-4.1-mini-or-gemini-1.5"
+  temperature: 0.75
+  max_output_tokens: 1000
+
+status_bar:
+  items:
+    - var_id: trust_da
+      label: "DA信任"
+      style: meter
+      show_delta: true
+      critical_threshold: 20
+    - var_id: trust_ca
+      label: "CA默契"
+      style: meter
+      show_delta: true
+      critical_threshold: 20
+    - var_id: fatigue
+      label: "疲劳度"
+      style: meter
+      show_delta: true
+      critical_threshold: 80
+    - var_id: satisfaction
+      label: "满意度"
+      style: meter
+      show_delta: true
+      critical_threshold: 30
+    - var_id: route_progress
+      label: "行程"
+      style: text
+      show_delta: false
+      critical_threshold: 0
+    - var_id: battery
+      label: "电量"
+      style: text
+      show_delta: true
+      critical_threshold: 15
+
+variables:
+  - id: trust_da
+    label: "对Driving Assistant的信任"
+    type: integer
+    min: 0
+    max: 100
+    default: 50
+    card: { visible: true, order: 10, format: bar, description: "你对车辆自动驾驶能力的信任程度。", prompt_weight: high }
+    rules: { clamp: true, readonly: false, update_policy: any }
+    tags: ["relationship"]
+
+  - id: trust_ca
+    label: "与Cockpit Assistant的默契"
+    type: integer
+    min: 0
+    max: 100
+    default: 40
+    card: { visible: true, order: 15, format: bar, description: "你与车载AI的交互默契度。", prompt_weight: high }
+    rules: { clamp: true, readonly: false, update_policy: any }
+    tags: ["relationship"]
+
+  - id: fatigue
+    label: "驾驶疲劳度"
+    type: integer
+    min: 0
+    max: 100
+    default: 20
+    card: { visible: true, order: 20, format: bar, description: "身体和精神疲劳程度。", prompt_weight: high }
+    rules: { clamp: true, readonly: false, update_policy: any }
+    tags: ["resource"]
+
+  - id: satisfaction
+    label: "用车满意度"
+    type: integer
+    min: 0
+    max: 100
+    default: 60
+    card: { visible: true, order: 25, format: bar, description: "整体用车体验的满意度。", prompt_weight: high }
+    rules: { clamp: true, readonly: false, update_policy: any }
+    tags: ["progress"]
+
+  - id: battery
+    label: "车辆电量"
+    type: integer
+    min: 0
+    max: 100
+    default: 85
+    card: { visible: true, order: 30, format: plain, description: "剩余电量百分比。", prompt_weight: medium }
+    rules: { clamp: true, readonly: false, update_policy: any }
+    tags: ["resource"]
+
+  - id: route_progress
+    label: "行程进度"
+    type: object
+    default:
+      current: "出发前"
+      destination: ""
+      distance_km: 0
+      estimated_arrival: ""
+    card:
+      visible: true
+      order: 35
+      format: keyvalue
+      description: "当前行程状态。"
+      prompt_weight: medium
+    rules: { clamp: false, readonly: false, update_policy: any }
+    tags: ["world"]
+
+  - id: da_interventions
+    label: "DA介入次数"
+    type: integer
+    min: 0
+    max: 50
+    default: 0
+    card: { visible: false, order: 0, format: plain, description: "Driving Assistant主动介入控制的次数。", prompt_weight: medium }
+    rules: { clamp: true, readonly: false, update_policy: any }
+    tags: ["progress"]
+
+  - id: ca_conversations
+    label: "CA对话次数"
+    type: integer
+    min: 0
+    max: 100
+    default: 0
+    card: { visible: false, order: 0, format: plain, description: "与Cockpit Assistant的对话交互次数。", prompt_weight: low }
+    rules: { clamp: true, readonly: false, update_policy: any }
+    tags: ["progress"]
+
+  - id: knowledge_da
+    label: "对DA的了解"
+    type: integer
+    min: 0
+    max: 100
+    default: 10
+    card: { visible: true, order: 40, format: bar, description: "你对Driving Assistant工作原理的理解。", prompt_weight: medium }
+    rules: { clamp: true, readonly: false, update_policy: any }
+    tags: ["knowledge"]
+
+  - id: knowledge_ca
+    label: "对CA的了解"
+    type: integer
+    min: 0
+    max: 100
+    default: 10
+    card: { visible: true, order: 45, format: bar, description: "你对Cockpit Assistant能力的理解。", prompt_weight: medium }
+    rules: { clamp: true, readonly: false, update_policy: any }
+    tags: ["knowledge"]
+
+  - id: unlocked_features
+    label: "已解锁功能"
+    type: list
+    default: ["基础语音控制", "导航查询"]
+    card: { visible: true, order: 50, format: list, description: "CDI系统已为你激活的功能。", prompt_weight: medium }
+    rules: { clamp: false, readonly: false, update_policy: any }
+    tags: ["progress"]
+
+  - id: memories
+    label: "共同记忆"
+    type: list
+    default: []
+    card: { visible: true, order: 55, format: list, description: "你与CDI系统共同经历的重要时刻。", prompt_weight: medium }
+    rules: { clamp: false, readonly: false, update_policy: any }
+    tags: ["knowledge"]
+
+  - id: location
+    label: "当前位置"
+    type: enum
+    enum_values: ["家中车库", "城市快速路", "高速公路", "服务区", "景区山路", "古镇街道", "湖边公路", "返程高速", "公司停车场"]
+    default: "家中车库"
+    card: { visible: true, order: 60, format: plain, description: "车辆当前所在位置。", prompt_weight: high }
+    rules: { clamp: false, readonly: false, update_policy: set_only }
+    tags: ["world"]
+
+  - id: flags
+    label: "状态标记"
+    type: object
+    default:
+      first_meeting: true
+      commute_done: false
+      trip_started: false
+      rain_mode: false
+      night_mode: false
+      low_battery_alert: false
+      fatigue_warning: false
+      da_explained: false
+      ca_explained: false
+      emergency_handled: false
+      scenic_stop_done: false
+      hotel_booked: false
+      tourist_helped: false
+      charging_done: false
+      return_trip: false
+      final_scene: false
+    card: { visible: true, order: 80, format: keyvalue, description: "剧情推进状态。", prompt_weight: low }
+    rules: { clamp: false, readonly: false, update_policy: any }
+    tags: ["flag"]
+
+initial_state:
+  trust_da: 50
+  trust_ca: 40
+  fatigue: 20
+  satisfaction: 60
+  battery: 85
+  route_progress:
+    current: "出发前"
+    destination: ""
+    distance_km: 0
+    estimated_arrival: ""
+  da_interventions: 0
+  ca_conversations: 0
+  knowledge_da: 10
+  knowledge_ca: 10
+  unlocked_features: ["基础语音控制", "导航查询"]
+  memories: []
+  location: "家中车库"
+  flags:
+    first_meeting: true
+    commute_done: false
+    trip_started: false
+    rain_mode: false
+    night_mode: false
+    low_battery_alert: false
+    fatigue_warning: false
+    da_explained: false
+    ca_explained: false
+    emergency_handled: false
+    scenic_stop_done: false
+    hotel_booked: false
+    tourist_helped: false
+    charging_done: false
+    return_trip: false
+    final_scene: false
+
+win_conditions:
+  - "satisfaction >= 85 and trust_da >= 70 and trust_ca >= 70"
+  - "flags.final_scene == true and satisfaction >= 75"
+
+lose_conditions:
+  - "trust_da <= 10"
+  - "trust_ca <= 10"
+  - "fatigue >= 100"
+  - "battery <= 0"
+
+prompt_rules:
+  style_notes:
+    - "日常科技感：自然、温暖、不炫技，像一个贴心的智能伙伴。"
+    - "对话驱动：大量展现车主与CA的语音交互，DA的动作以简洁提示呈现。"
+    - "分层展现：明确区分DA的底层安全操作（简短、确定性）和CA的交互层（自然、有温度）。"
+    - "场景真实：通勤堵车、高速巡航、雨天夜路、景区找路、电量焦虑等真实用车场景。"
+    - "角色分明：DA是'沉默的守护者'，CA是'会聊天的副驾'。"
+  boundaries:
+    - "PG级别：不涉及危险驾驶行为示范。"
+    - "安全第一：DA介入必须是保护性的，不能是威胁性的。"
+    - "不能替玩家做决定，必须给出选择。"
