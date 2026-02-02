@@ -1,7 +1,7 @@
 items:
   - id: key_fob
     name: "车钥匙"
-    description: "不只是开门，也是一种"今天开始了"的确认。"
+    description: "不只是开门，也是一种今天开始了的确认。"
     use: "用于启动/授权；也可在结局时象征性选择默认模式。"
     tags: ["personal"]
 
@@ -26,7 +26,7 @@ items:
   - id: typec_cable
     name: "Type-C 线"
     description: "把电量、音乐和耐心都接起来。"
-    use: "用于补电或连接设备；也可触发"本地离线包下载"。"
+    use: "用于补电或连接设备；也可触发本地离线包下载。"
     tags: ["tool"]
 
   - id: offline_map_pack

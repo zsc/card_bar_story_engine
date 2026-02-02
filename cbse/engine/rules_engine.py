@@ -76,6 +76,8 @@ class RulesEngine:
 
     def _apply_update(self, state: dict[str, Any], update: StateUpdateOp, allow_readonly: bool) -> bool:
         path = update.path.lstrip("/")
+        # 容错：统一分隔符为 .，支持 / 和 . 两种格式
+        path = path.replace("/", ".")
         root = path.split(".")[0]
         if root not in self.variables:
             return False

@@ -34,7 +34,7 @@ status_bar:
       critical_threshold: 20
     - var_id: milestones
       label: "体验点"
-      style: bar
+      style: meter
       show_delta: true
       critical_threshold: 0
     - var_id: connectivity
@@ -89,7 +89,7 @@ variables:
       visible: true
       order: 20
       format: bar
-      description: "信息量、决策压力、情绪与任务堆叠造成的负荷。越高越需要"减负"。"
+      description: "信息量、决策压力、情绪与任务堆叠造成的负荷。越高越需要减负。"
       prompt_weight: high
     rules: { clamp: true, readonly: false, update_policy: any }
     tags: ["risk"]
@@ -282,7 +282,7 @@ initial_state:
   milestones: 0
   journey_log: []
   leads:
-    - "让座舱助手做一次"通勤简报"（日程/路线/风险）"
+    - "让座舱助手做一次通勤简报（日程/路线/风险）"
     - "选择交互强度：驾驶优先 or 生活优先"
     - "出发：进入城市主路"
   location: "家门口"
@@ -327,7 +327,7 @@ prompt_rules:
     - "大量对话：座舱助手负责解释/建议/总结；驾驶助手只说安全关键与可验证信息。"
     - "分层呈现：先给一句结论，再给一条可解释理由；避免长篇。"
     - "Edge 优先：弱网/离线时明确说明能力边界，只使用本地可用信息。"
-    - "驾驶中减负：注意力下降或负荷上升时，自动切到"语音精简/停车后再说"。"
+    - "驾驶中减负：注意力下降或负荷上升时，自动切到语音精简/停车后再说。"
     - "每回合推进一个具体变化：时间/电量/负荷/信任/体验点之一。"
   boundaries:
     - "PG-13：不描写血腥细节，不含露骨内容。"

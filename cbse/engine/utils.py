@@ -13,6 +13,8 @@ def clone_state(state: dict[str, Any]) -> dict[str, Any]:
 
 
 def deep_get(data: dict[str, Any], path: str) -> Any:
+    # 容错：统一分隔符为 .，支持 / 和 . 两种格式
+    path = path.replace("/", ".")
     current: Any = data
     for key in path.split("."):
         if isinstance(current, dict) and key in current:
@@ -31,6 +33,8 @@ def deep_exists(data: dict[str, Any], path: str) -> bool:
 
 
 def deep_set(data: dict[str, Any], path: str, value: Any) -> None:
+    # 容错：统一分隔符为 .，支持 / 和 . 两种格式
+    path = path.replace("/", ".")
     parts = path.split(".")
     current: Any = data
     for key in parts[:-1]:

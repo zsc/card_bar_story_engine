@@ -102,6 +102,36 @@ class PromptBuilder:
             state_lines.append(f"- {var_def.label} ({var_id}): {value}")
         state_text = "\n".join(state_lines)
 
+        # 构建可用的 state_update 路径参考
+        # 简单类型变量
+        simple_vars = []
+        # object 类型的嵌套路径
+        nested_paths = []
+        
+        for var_id, var_def in self.variables.items():
+            if var_def.rules.readonly:
+                continue
+            if var_def.type in ("integer", "number"):
+                simple_vars.append(f"/{var_id} (int)")
+            elif var_def.type == "boolean":
+                simple_vars.append(f"/{var_id} (bool)")
+            elif var_def.type == "enum":
+                simple_vars.append(f"/{var_id} (enum)")
+            elif var_def.type == "object" and var_def.id in ctx.state:
+                nested = ctx.state[var_def.id]
+                if isinstance(nested, dict):
+                    for key in nested.keys():
+                        nested_paths.append(f"/{var_id}/{key}")
+        
+        simple_vars_str = ", ".join(simple_vars[:8])
+        nested_paths_str = ", ".join(nested_paths[:6])
+        
+        state_update_hint = (
+            f"Simple paths: {simple_vars_str}\n"
+            f"Nested paths: {nested_paths_str}\n"
+            f"IMPORTANT: Only use paths listed above. Do NOT invent new paths like /progress, /cognitive, /comfort."
+        )
+
         history_text = ""
         if ctx.memory_summary:
             history_text += f"Memory summary:\n{ctx.memory_summary}\n\n"
@@ -118,6 +148,7 @@ class PromptBuilder:
 
         return (
             f"State:\n{state_text}\n\n"
+            f"Valid state_update paths (use / as separator):\n{state_update_hint}\n\n"
             f"{history_text}\n\n"
             f"{choices_text}\n\n"
             f"Player input: {ctx.player_input}\n"

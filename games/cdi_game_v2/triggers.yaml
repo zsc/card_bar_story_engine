@@ -199,7 +199,7 @@ triggers:
         reason: "方案提示"
     events:
       - type: "warning"
-        message: "早会临近。你可以选"最快"或"更稳"：差别不只在分钟，也在你到场时的状态。"
+        message: "早会临近。你可以选最快或更稳：差别不只在分钟，也在你到场时的状态。"
 
   # ========= 周末计划：家中车库 =========
   - id: friday_planning
