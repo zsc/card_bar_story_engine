@@ -1,0 +1,42 @@
+items:
+  - id: key_fob
+    name: "车钥匙"
+    description: "不只是开门，也是一种"今天开始了"的确认。"
+    use: "用于启动/授权；也可在结局时象征性选择默认模式。"
+    tags: ["personal"]
+
+  - id: phone
+    name: "手机"
+    description: "信息的入口，也是分心的入口。"
+    use: "与座舱助手同步日程/消息；在驾驶中会提高负荷。"
+    tags: ["social", "risk"]
+
+  - id: commute_mug
+    name: "通勤杯"
+    description: "热度能撑过一段拥堵。"
+    use: "安抚情绪，降低负荷（叙事向）。"
+    tags: ["comfort"]
+
+  - id: charging_card
+    name: "充电卡"
+    description: "一张卡能换来半天的余地。"
+    use: "在需要充电停靠时减少摩擦与时间损耗。"
+    tags: ["resource"]
+
+  - id: typec_cable
+    name: "Type-C 线"
+    description: "把电量、音乐和耐心都接起来。"
+    use: "用于补电或连接设备；也可触发"本地离线包下载"。"
+    tags: ["tool"]
+
+  - id: offline_map_pack
+    name: "离线地图包"
+    description: "没有信号时，路仍然在。"
+    use: "弱网/离线场景中保持导航与关键 POI（本地库）可用。"
+    tags: ["tool", "edge"]
+
+  - id: dashcam_clip
+    name: "行车片段摘要"
+    description: "不是完整视频，而是车端生成的'关键帧+事件描述'。"
+    use: "用于解释驾驶助手的规控决策，提升可解释性与信任。"
+    tags: ["explainability", "safety"]

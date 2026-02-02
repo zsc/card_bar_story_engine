@@ -1,0 +1,419 @@
+triggers:
+  # ========= 失败条件（引擎会同时检查 lose_conditions，这里补充叙事） =========
+  - id: game_over_stranded
+    priority: 1
+    once: true
+    when: "battery <= 0"
+    effects: []
+    events:
+      - type: "end"
+        message: "电量归零，车辆进入保护模式。你只能停在路边，行程被迫中止。"
+
+  - id: game_over_overload
+    priority: 2
+    once: true
+    when: "load >= 100"
+    effects: []
+    events:
+      - type: "end"
+        message: "信息、时间、情绪一起压上来。你意识到今天不适合再推动任何事。"
+
+  # ========= 开场：家门口 =========
+  - id: morning_briefing
+    priority: 10
+    once: true
+    when: "location == '家门口' and flags.morning_briefed == false"
+    effects:
+      - op: set
+        path: "flags.morning_briefed"
+        value: true
+        reason: "开场启动"
+      - op: inc
+        path: "milestones"
+        value: 1
+        reason: "体验：分层系统上线"
+      - op: push
+        path: "journey_log"
+        value: "清晨启程：驾驶助手完成自检，座舱助手提出通勤简报与交互模式选择。"
+        reason: "记录开场"
+      - op: push
+        path: "leads"
+        value: "选择：通勤简报 / 直接出发 / 设定交互模式"
+        reason: "引导选择"
+    events:
+      - type: "info"
+        message: "系统上线：一个负责安全，一个负责把生活压缩成几句话。"
+
+  # ========= 驾驶中减负策略 =========
+  - id: attention_low_warning
+    priority: 20
+    once: true
+    when: "attention <= 30 and flags.attention_low_warn == false"
+    effects:
+      - op: set
+        path: "flags.attention_low_warn"
+        value: true
+        reason: "注意力过低"
+      - op: set
+        path: "flags.voice_only_mode"
+        value: true
+        reason: "切换到语音精简"
+      - op: inc
+        path: "load"
+        value: 5
+        reason: "分心的代价"
+      - op: push
+        path: "journey_log"
+        value: "注意力下降：系统自动收紧交互，仅保留必要播报。"
+        reason: "记录策略切换"
+    events:
+      - type: "warning"
+        message: "注意力偏低。座舱助手进入精简模式：复杂请求将推迟到停车后处理。"
+
+  - id: load_high_warning
+    priority: 21
+    once: true
+    when: "load >= 80 and flags.load_high_warn == false"
+    effects:
+      - op: set
+        path: "flags.load_high_warn"
+        value: true
+        reason: "负荷过高"
+      - op: inc
+        path: "attention"
+        value: -5
+        reason: "负荷挤占注意力"
+      - op: push
+        path: "leads"
+        value: "建议：减少对话/靠边短暂停/让系统仅播报关键"
+        reason: "减负建议"
+    events:
+      - type: "warning"
+        message: "负荷偏高。建议把'要处理的事'分两批：车动时只处理关键，停车后再处理其他。"
+
+  - id: battery_low_warning
+    priority: 22
+    once: true
+    when: "battery <= 20 and flags.battery_low_warn == false"
+    effects:
+      - op: set
+        path: "flags.battery_low_warn"
+        value: true
+        reason: "电量过低"
+      - op: inc
+        path: "load"
+        value: 6
+        reason: "续航焦虑增加负荷"
+      - op: push
+        path: "leads"
+        value: "规划：选择最近可用充电停靠（或调整路线/降低能耗）"
+        reason: "续航引导"
+      - op: push
+        path: "journey_log"
+        value: "电量进入低阈值：系统建议加入充电停靠并压缩信息输出。"
+        reason: "记录电量节点"
+    events:
+      - type: "warning"
+        message: "电量偏低。建议在不增加分心的前提下，尽快加入一次充电停靠。"
+
+  # ========= 通勤线推进 =========
+  - id: city_first_visit
+    priority: 30
+    once: true
+    when: "location == '城市主路' and flags.city_checked == false"
+    effects:
+      - op: set
+        path: "flags.city_checked"
+        value: true
+        reason: "进入城市主路"
+      - op: inc
+        path: "threads.commute"
+        value: 1
+        reason: "通勤进度推进"
+      - op: inc
+        path: "milestones"
+        value: 1
+        reason: "体验：驾驶中信息压缩"
+      - op: push
+        path: "journey_log"
+        value: "进入早高峰：座舱助手用短句播报路线与风险，驾驶助手持续监控车距与并线。"
+        reason: "记录通勤"
+      - op: push
+        path: "leads"
+        value: "选择：保持当前路线 / 绕行但更复杂 / 暂停处理电话与消息"
+        reason: "行动方向"
+    events:
+      - type: "info"
+        message: "早高峰开始了：路很忙，你的脑子也会忙。"
+
+  - id: office_first_visit
+    priority: 31
+    once: true
+    when: "location == '公司停车场' and flags.office_checked == false"
+    effects:
+      - op: set
+        path: "flags.office_checked"
+        value: true
+        reason: "抵达公司停车场"
+      - op: inc
+        path: "threads.commute"
+        value: 1
+        reason: "通勤进度推进"
+      - op: inc
+        path: "milestones"
+        value: 1
+        reason: "体验：泊车与总结"
+      - op: inc
+        path: "trust.cockpit"
+        value: 5
+        reason: "停车后总结更有用"
+      - op: push
+        path: "journey_log"
+        value: "抵达公司：驾驶助手协助泊车，座舱助手在停车后总结通勤并整理待办。"
+        reason: "记录到达"
+      - op: push
+        path: "leads"
+        value: "停车后可处理：回拨电话/确认早会材料/设定周末出游计划"
+        reason: "停车后再说"
+    events:
+      - type: "info"
+        message: "车停稳后，信息才真正回到你手上。"
+
+  # ========= 会议临近提醒（通勤压力，但不强制） =========
+  - id: meeting_deadline_warn
+    priority: 35
+    once: true
+    when: "time.day == 1 and time.hour == 8 and time.minute >= 30 and flags.meeting_deadline_warn == false and location != '公司停车场'"
+    effects:
+      - op: set
+        path: "flags.meeting_deadline_warn"
+        value: true
+        reason: "早会临近"
+      - op: inc
+        path: "load"
+        value: 8
+        reason: "时间压力增加"
+      - op: push
+        path: "leads"
+        value: "座舱助手可给你两个方案：最快到达 or 更稳更省心"
+        reason: "方案提示"
+    events:
+      - type: "warning"
+        message: "早会临近。你可以选"最快"或"更稳"：差别不只在分钟，也在你到场时的状态。"
+
+  # ========= 周末计划：家中车库 =========
+  - id: friday_planning
+    priority: 40
+    once: true
+    when: "location == '家中车库' and flags.friday_planned == false"
+    effects:
+      - op: set
+        path: "flags.friday_planned"
+        value: true
+        reason: "周末计划启动"
+      - op: inc
+        path: "threads.trip"
+        value: 1
+        reason: "出游线推进"
+      - op: inc
+        path: "milestones"
+        value: 1
+        reason: "体验：本地规划与确认"
+      - op: push
+        path: "journey_log"
+        value: "周末规划开始：座舱助手用本地库给出行程草案，并把需要确认的点逐条问清。"
+        reason: "记录规划"
+      - op: push
+        path: "leads"
+        value: "选择：快速路线/风景路线；是否下载离线地图包；是否预置充电停靠"
+        reason: "规划选项"
+    events:
+      - type: "info"
+        message: "周末的路还没开始，但你可以先把它变得更轻松。"
+
+  # ========= 出游：高速入口 =========
+  - id: highway_start
+    priority: 50
+    once: true
+    when: "location == '高速入口' and flags.highway_started == false"
+    effects:
+      - op: set
+        path: "flags.highway_started"
+        value: true
+        reason: "进入高速"
+      - op: inc
+        path: "threads.trip"
+        value: 1
+        reason: "出游线推进"
+      - op: inc
+        path: "battery"
+        value: -8
+        reason: "高速消耗增加（抽象）"
+      - op: inc
+        path: "milestones"
+        value: 1
+        reason: "体验：驾驶优先交互"
+      - op: push
+        path: "journey_log"
+        value: "周末出发：高速路段交互被压缩，系统优先稳定车速与车距。"
+        reason: "记录出发"
+      - op: push
+        path: "leads"
+        value: "选择：让座舱助手播报'30 秒版行程' / 关闭所有非必要提醒 / 给旅伴一个 ETA"
+        reason: "旅途对话"
+    events:
+      - type: "info"
+        message: "上高速后，系统会更像一个认真负责的副驾驶。"
+
+  # ========= 山路：离线与安全更强 =========
+  - id: mountain_offline_switch
+    priority: 60
+    once: true
+    when: "location == '山路' and flags.mountain_offline == false"
+    effects:
+      - op: set
+        path: "flags.mountain_offline"
+        value: true
+        reason: "进入山路"
+      - op: set
+        path: "connectivity"
+        value: "离线"
+        reason: "山路信号差"
+      - op: inc
+        path: "milestones"
+        value: 1
+        reason: "体验：离线韧性"
+      - op: push
+        path: "journey_log"
+        value: "进入山路离线：座舱助手明确边界，仅用本地导航与本地行程；驾驶助手强化弯道与会车预警。"
+        reason: "记录离线"
+      - op: push
+        path: "leads"
+        value: "选择：启用离线地图包（若未准备）/ 暂停闲聊 / 找安全地点短停休息"
+        reason: "离线应对"
+    events:
+      - type: "breakthrough"
+        message: "网络断了，但系统没慌：它只说本地能做什么，以及什么做不了。"
+
+  # ========= 充电站 =========
+  - id: charging_stop
+    priority: 70
+    once: true
+    when: "location == '服务区充电站' and flags.charging_done == false"
+    effects:
+      - op: set
+        path: "flags.charging_done"
+        value: true
+        reason: "完成一次充电停靠"
+      - op: inc
+        path: "battery"
+        value: 35
+        reason: "补能（抽象）"
+      - op: dec
+        path: "load"
+        value: 8
+        reason: "续航焦虑下降"
+      - op: inc
+        path: "milestones"
+        value: 1
+        reason: "体验：充电规划"
+      - op: push
+        path: "journey_log"
+        value: "服务区充电：座舱助手用最少步骤完成确认，停车后再给你明细。"
+        reason: "记录充电"
+      - op: push
+        path: "leads"
+        value: "选择：继续前往酒店 / 临时改去景点 / 先让旅伴休息"
+        reason: "下一站"
+    events:
+      - type: "info"
+        message: "补能完成。你会发现'少做一步'，比'知道更多'更管用。"
+
+  # ========= 酒店 =========
+  - id: hotel_checkin
+    priority: 80
+    once: true
+    when: "location == '目的地酒店' and flags.hotel_checked_in == false"
+    effects:
+      - op: set
+        path: "flags.hotel_checked_in"
+        value: true
+        reason: "抵达酒店"
+      - op: inc
+        path: "threads.trip"
+        value: 1
+        reason: "出游线推进"
+      - op: inc
+        path: "threads.comfort"
+        value: 1
+        reason: "舒适体验推进"
+      - op: inc
+        path: "milestones"
+        value: 1
+        reason: "体验：到达总结与次日计划"
+      - op: push
+        path: "journey_log"
+        value: "抵达酒店：系统在停车后生成'今日旅程摘要'，并询问是否设定明日出发与返程策略。"
+        reason: "记录到达"
+      - op: push
+        path: "leads"
+        value: "选择：设定明日行程/开启安静模式/回顾驾驶助手关键动作（可解释性）"
+        reason: "夜间选项"
+    events:
+      - type: "info"
+        message: "到达不是终点，是把今天从脑子里卸下来的开始。"
+
+  # ========= 回程 =========
+  - id: return_start
+    priority: 90
+    once: true
+    when: "location == '回程高速' and flags.return_started == false"
+    effects:
+      - op: set
+        path: "flags.return_started"
+        value: true
+        reason: "开始回程"
+      - op: inc
+        path: "threads.trip"
+        value: 1
+        reason: "出游线推进"
+      - op: inc
+        path: "battery"
+        value: -10
+        reason: "回程消耗（抽象）"
+      - op: push
+        path: "journey_log"
+        value: "回程开始：系统默认更保守的策略，并询问是否开启驾驶优先模式。"
+        reason: "记录回程"
+    events:
+      - type: "info"
+        message: "回程通常更累：系统会更主动地把'不必要的事'挡在外面。"
+
+  - id: arrive_home_complete
+    priority: 95
+    once: true
+    when: "location == '回到家' and flags.trip_completed == false"
+    effects:
+      - op: set
+        path: "flags.trip_completed"
+        value: true
+        reason: "旅程完成"
+      - op: inc
+        path: "milestones"
+        value: 1
+        reason: "体验：完成闭环"
+      - op: push
+        path: "journey_log"
+        value: "回到家：旅程闭环完成。系统请求你选择默认交互模式，形成长期配置。"
+        reason: "记录结束"
+      - op: push
+        path: "leads"
+        value: "结局选择：平衡 / 安全优先 / 最少干预 / 离线优先"
+        reason: "开启结局路线"
+      - op: set
+        path: "flags.ending_ready"
+        value: true
+        reason: "准备进入结局"
+    events:
+      - type: "breakthrough"
+        message: "你熄火的那一刻，系统没有继续讲话——只把选择留给你。"

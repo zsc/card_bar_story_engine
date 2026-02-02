@@ -1,0 +1,336 @@
+game_id: cdi_game_v2
+title: "一路有 CDI"
+version: "0.9.0"
+language: "zh-CN"
+tone: "modern_tech_slice_of_life"
+content_rating: "PG-13"
+
+llm:
+  recommended_model: "gpt-4.1-mini-or-gemini-1.5"
+  temperature: 0.75
+  max_output_tokens: 1100
+
+status_bar:
+  items:
+    - var_id: safety
+      label: "安全"
+      style: meter
+      show_delta: true
+      critical_threshold: 55
+    - var_id: attention
+      label: "注意力"
+      style: meter
+      show_delta: true
+      critical_threshold: 25
+    - var_id: load
+      label: "负荷"
+      style: meter
+      show_delta: true
+      critical_threshold: 80
+    - var_id: battery
+      label: "电量"
+      style: meter
+      show_delta: true
+      critical_threshold: 20
+    - var_id: milestones
+      label: "体验点"
+      style: bar
+      show_delta: true
+      critical_threshold: 0
+    - var_id: connectivity
+      label: "网络"
+      style: text
+      show_delta: false
+      critical_threshold: 0
+    - var_id: time
+      label: "时间"
+      style: text
+      show_delta: false
+      critical_threshold: 0
+
+variables:
+  - id: safety
+    label: "安全"
+    type: integer
+    min: 0
+    max: 100
+    default: 92
+    card:
+      visible: true
+      order: 10
+      format: bar
+      description: "综合安全态势。越低越需要收紧交互与驾驶策略。"
+      prompt_weight: high
+    rules: { clamp: true, readonly: false, update_policy: any }
+    tags: ["risk"]
+
+  - id: attention
+    label: "注意力"
+    type: integer
+    min: 0
+    max: 100
+    default: 85
+    card:
+      visible: true
+      order: 15
+      format: bar
+      description: "驾驶注意力与分心程度的反向指标。越低越危险。"
+      prompt_weight: high
+    rules: { clamp: true, readonly: false, update_policy: any }
+    tags: ["risk"]
+
+  - id: load
+    label: "认知负荷"
+    type: integer
+    min: 0
+    max: 100
+    default: 25
+    card:
+      visible: true
+      order: 20
+      format: bar
+      description: "信息量、决策压力、情绪与任务堆叠造成的负荷。越高越需要"减负"。"
+      prompt_weight: high
+    rules: { clamp: true, readonly: false, update_policy: any }
+    tags: ["risk"]
+
+  - id: battery
+    label: "电量"
+    type: integer
+    min: 0
+    max: 100
+    default: 68
+    card:
+      visible: true
+      order: 25
+      format: bar
+      description: "车辆电量（抽象）。影响是否需要充电停靠与路线选择。"
+      prompt_weight: high
+    rules: { clamp: true, readonly: false, update_policy: any }
+    tags: ["resource"]
+
+  - id: time
+    label: "时间"
+    type: object
+    default: { day: 1, hour: 7, minute: 40 }
+    card:
+      visible: true
+      order: 30
+      format: keyvalue
+      description: "故事跨越通勤与周末出游。关键节点会触发提醒或压力变化。"
+      prompt_weight: high
+    rules: { clamp: false, readonly: false, update_policy: any }
+    tags: ["resource"]
+
+  - id: connectivity
+    label: "网络状态"
+    type: enum
+    enum_values: ["在线", "弱网", "离线"]
+    default: "弱网"
+    card:
+      visible: true
+      order: 35
+      format: plain
+      description: "用于强调 Edge 端能力：弱网/离线时，座舱助手只用本地能力。"
+      prompt_weight: high
+    rules: { clamp: false, readonly: false, update_policy: set_only }
+    tags: ["world"]
+
+  - id: milestones
+    label: "体验点"
+    type: integer
+    min: 0
+    max: 12
+    default: 0
+    card:
+      visible: true
+      order: 40
+      format: bar
+      description: "你体验到的 CDI 关键能力片段数量（0-12）。"
+      prompt_weight: medium
+    rules: { clamp: true, readonly: false, update_policy: any }
+    tags: ["progress"]
+
+  - id: journey_log
+    label: "旅程记录"
+    type: list
+    default: []
+    card:
+      visible: true
+      order: 45
+      format: list
+      description: "用一句话记录已发生的重要事件与系统决策。"
+      prompt_weight: medium
+    rules: { clamp: false, readonly: false, update_policy: any }
+    tags: ["knowledge"]
+
+  - id: leads
+    label: "下一步"
+    type: list
+    default: []
+    card:
+      visible: true
+      order: 50
+      format: list
+      description: "下一步可做的行动与对话方向。"
+      prompt_weight: medium
+    rules: { clamp: false, readonly: false, update_policy: any }
+    tags: ["progress"]
+
+  - id: location
+    label: "所在地点"
+    type: enum
+    enum_values:
+      - "家门口"
+      - "城市主路"
+      - "公司停车场"
+      - "家中车库"
+      - "高速入口"
+      - "山路"
+      - "服务区充电站"
+      - "目的地酒店"
+      - "回程高速"
+      - "回到家"
+    default: "家门口"
+    card:
+      visible: true
+      order: 55
+      format: plain
+      description: "当前场景位置。"
+      prompt_weight: high
+    rules: { clamp: false, readonly: false, update_policy: set_only }
+    tags: ["world"]
+
+  - id: trust
+    label: "信任"
+    type: object
+    default: { cockpit: 10, driving: 10 }
+    card:
+      visible: true
+      order: 60
+      format: keyvalue
+      description: "你对座舱助手/驾驶助手的信任度（-100..100）。影响建议风格与接管接受度。"
+      prompt_weight: medium
+    rules: { clamp: false, readonly: false, update_policy: any }
+    tags: ["relationship"]
+
+  - id: threads
+    label: "进度线"
+    type: object
+    default: { commute: 0, trip: 0, autonomy: 0, comfort: 0 }
+    card:
+      visible: true
+      order: 65
+      format: keyvalue
+      description: "通勤/出游/自动化接受度/舒适体验 的推进程度（0-3）。"
+      prompt_weight: medium
+    rules: { clamp: false, readonly: false, update_policy: any }
+    tags: ["progress"]
+
+  - id: inventory
+    label: "随身物品"
+    type: list
+    default: ["车钥匙", "手机", "通勤杯", "充电卡", "Type-C 线"]
+    card:
+      visible: true
+      order: 70
+      format: list
+      description: "日常物品与旅途准备。部分物品可在剧情中获得/升级。"
+      prompt_weight: low
+    rules: { clamp: false, readonly: false, update_policy: any }
+    tags: ["items"]
+
+  - id: flags
+    label: "旗标"
+    type: object
+    default:
+      morning_briefed: false
+      city_checked: false
+      office_checked: false
+      friday_planned: false
+      highway_started: false
+      mountain_offline: false
+      charging_done: false
+      hotel_checked_in: false
+      return_started: false
+      trip_completed: false
+
+      voice_only_mode: false
+      attention_low_warn: false
+      load_high_warn: false
+      battery_low_warn: false
+
+      da_intervened: false
+      meeting_deadline_warn: false
+      ending_ready: false
+    card:
+      visible: true
+      order: 80
+      format: keyvalue
+      description: "引擎内部的剧情开关。"
+      prompt_weight: low
+    rules: { clamp: false, readonly: false, update_policy: any }
+    tags: ["flag"]
+
+initial_state:
+  safety: 92
+  attention: 85
+  load: 25
+  battery: 68
+  time: { day: 1, hour: 7, minute: 40 }
+  connectivity: "弱网"
+  milestones: 0
+  journey_log: []
+  leads:
+    - "让座舱助手做一次"通勤简报"（日程/路线/风险）"
+    - "选择交互强度：驾驶优先 or 生活优先"
+    - "出发：进入城市主路"
+  location: "家门口"
+  trust: { cockpit: 10, driving: 10 }
+  threads: { commute: 0, trip: 0, autonomy: 0, comfort: 0 }
+  inventory: ["车钥匙", "手机", "通勤杯", "充电卡", "Type-C 线"]
+  flags:
+    morning_briefed: false
+    city_checked: false
+    office_checked: false
+    friday_planned: false
+    highway_started: false
+    mountain_offline: false
+    charging_done: false
+    hotel_checked_in: false
+    return_started: false
+    trip_completed: false
+
+    voice_only_mode: false
+    attention_low_warn: false
+    load_high_warn: false
+    battery_low_warn: false
+
+    da_intervened: false
+    meeting_deadline_warn: false
+    ending_ready: false
+
+win_conditions:
+  - "flags.trip_completed == true and safety >= 70 and milestones >= 8"
+  - "flags.trip_completed == true and flags.mountain_offline == true and milestones >= 7"
+
+lose_conditions:
+  - "safety <= 0"
+  - "attention <= 0"
+  - "load >= 100"
+  - "battery <= 0"
+  - "time.day >= 4"
+
+prompt_rules:
+  style_notes:
+    - "现代科技生活叙事：清晰、具体、不过度拟人化。"
+    - "大量对话：座舱助手负责解释/建议/总结；驾驶助手只说安全关键与可验证信息。"
+    - "分层呈现：先给一句结论，再给一条可解释理由；避免长篇。"
+    - "Edge 优先：弱网/离线时明确说明能力边界，只使用本地可用信息。"
+    - "驾驶中减负：注意力下降或负荷上升时，自动切到"语音精简/停车后再说"。"
+    - "每回合推进一个具体变化：时间/电量/负荷/信任/体验点之一。"
+  boundaries:
+    - "PG-13：不描写血腥细节，不含露骨内容。"
+    - "不输出真实世界违法或危险驾驶操作指南。"
+    - "不能替玩家做最终决定：必须给出可选项。"
+    - "当车辆在行驶时，座舱助手避免诱发分心，必要时建议停车后处理。"

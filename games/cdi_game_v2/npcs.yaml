@@ -1,0 +1,40 @@
+npcs:
+  - id: cockpit
+    name: "座舱助手（CDI Cockpit）"
+    role: "交互与推理：语音/多模态、决策建议、工具调用、本地检索"
+    hook: "会把复杂信息压缩成几句话，并在驾驶时主动减负。"
+    secret: "它不会假装全知：弱网/离线会明确边界，只用本地能力。"
+    manner: "语气自然、短句优先；先结论后理由；必要时请求确认。"
+    leverage: "信任越高，它越敢'主动建议'；信任低则只做被动回答。"
+    location: "座舱"
+    tags: ["dialogue", "planner", "edge"]
+
+  - id: driving
+    name: "驾驶助手（CDI Driving）"
+    role: "安全关键闭环：感知融合、规控、故障降级、确定性执行"
+    hook: "遇到风险会直接介入，并将输出压缩为可验证信息。"
+    secret: "它不参与闲聊；当注意力下降时会强制收紧交互。"
+    manner: "短、准、无修辞；只播报关键风险与动作结果。"
+    leverage: "多次成功干预会提升你的接受度（autonomy 线）。"
+    location: "车辆底层"
+    tags: ["safety", "control"]
+
+  - id: colleague
+    name: "同事·阿哲"
+    role: "工作侧压力源"
+    hook: "早会上总有人临时加内容。"
+    secret: "他也焦虑，只是表达方式很硬。"
+    manner: "语速快，喜欢'先要结果'。"
+    leverage: "你如果按时到场，他会明显软下来。"
+    location: "电话里"
+    tags: ["work", "pressure"]
+
+  - id: friend
+    name: "旅伴·小岚"
+    role: "周末出游乘客"
+    hook: "想看展、想拍照、也怕你太累。"
+    secret: "她其实更在意'一路上你有没有轻松一点'。"
+    manner: "轻松、会开玩笑，但在你紧张时会收声。"
+    leverage: "她的反馈会影响你对座舱助手的接受度（comfort 线）。"
+    location: "副驾"
+    tags: ["travel", "comfort"]
